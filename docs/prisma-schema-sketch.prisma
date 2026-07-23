@@ -1,0 +1,330 @@
+// Tailor Master — Prisma Schema SKETCH (Stage 5)
+// STATUS: design sketch / placeholder — NOT the final migration.
+// Purpose: show the shape of the data model agreed in Stage 5.
+// Real schema is generated & migrated in Stage 6 (Project Setup) / Stage 7+.
+// Sensitive fields (images, measurements) are handled per the security section.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Identity & access ----------
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  phone        String?   @unique
+  passwordHash String
+  locale       String    @default("en") // en | ur | ar
+  unit         String    @default("in") // in | cm
+  roles        UserRole[]
+  customer     Customer?
+  sessions     Session[]
+  consents     ConsentRecord[]
+  createdAt    DateTime  @default(now())
+}
+
+model Role {
+  id          String       @id @default(uuid())
+  key         String       @unique // guest, customer, tailor, workshop_operator, qc, production_manager, catalog_manager, finance, admin, super_admin, support, measurement_reviewer
+  permissions Permission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id    String @id @default(uuid())
+  key   String @unique // e.g. order.read, measurement.lock, privacy.approve_delete
+  roles Role[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User @relation(fields: [userId], references: [id])
+  role   Role @relation(fields: [roleId], references: [id])
+  @@id([userId, roleId])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
+// ---------- Customer & body profiles ----------
+model Customer {
+  id        String        @id @default(uuid())
+  userId    String        @unique
+  user      User          @relation(fields: [userId], references: [id])
+  addresses Address[]
+  profiles  BodyProfile[]
+  carts     Cart[]
+  orders    Order[]
+}
+
+model Address {
+  id         String  @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  line       String
+  city       String
+  phone      String
+  isDefault  Boolean @default(false)
+}
+
+model BodyProfile {
+  id              String        @id @default(uuid())
+  customerId      String
+  customer        Customer      @relation(fields: [customerId], references: [id])
+  label           String        // "Mine", "Son", ...
+  heightCm        Float?
+  weightKg        Float?
+  fitPreference   String        @default("regular") // slim | regular | relaxed
+  source          String        // manual | garment | questionnaire | scan | in_store
+  confidence      Int?          // 0-100
+  verifiedByTailor Boolean      @default(false)
+  measurements    Measurement[]
+  createdAt       DateTime      @default(now())
+}
+
+model Measurement {
+  id          String   @id @default(uuid())
+  profileId   String
+  profile     BodyProfile @relation(fields: [profileId], references: [id])
+  kind        String   // body | garment | final
+  values      Json     // { chest: 100, waist: 88, ... } in cm
+  outlierFlags Json?
+  confidence  Int?
+  lockedAt    DateTime?
+  createdAt   DateTime @default(now())
+}
+
+// ---------- Catalog ----------
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  title         String
+  description   String?
+  basePrice     Decimal  @db.Decimal(10,2)
+  images        Json     // ordered asset refs
+  assets        Json?    // transparent garment, reference logo, 3D...
+  configSchemaId String?
+  configSchema  ConfigSchema? @relation(fields: [configSchemaId], references: [id])
+  variants      ProductVariant[]
+  fabrics       ProductFabric[]
+  createdAt     DateTime @default(now())
+}
+
+model ProductVariant {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  sku       String  @unique
+  sizeLabel String? // ready size S-XXL (null => MTM only)
+  priceDelta Decimal @default(0) @db.Decimal(10,2)
+}
+
+model Fabric {
+  id           String @id @default(uuid())
+  name         String
+  stretch      String  // stretch | non_stretch
+  weightGsm    Int?
+  pricePerUnit Decimal @db.Decimal(10,2)
+  shrinkageRule Json?
+  products     ProductFabric[]
+}
+
+model ProductFabric {
+  productId String
+  fabricId  String
+  product   Product @relation(fields: [productId], references: [id])
+  fabric    Fabric  @relation(fields: [fabricId], references: [id])
+  @@id([productId, fabricId])
+}
+
+// ---------- Configurator & pricing ----------
+model ConfigSchema {
+  id          String    @id @default(uuid())
+  name        String
+  version     Int
+  options     Json      // schema-driven option groups
+  rules       Json      // dependency / incompatibility / price / lead-time / approval rules
+  publishedAt DateTime?
+  products    Product[]
+  @@unique([name, version])
+}
+
+model PriceSnapshot {
+  id        String   @id @default(uuid())
+  orderId   String   @unique
+  order     Order    @relation(fields: [orderId], references: [id])
+  breakdown Json     // base, fabric, custom, embroidery, urgent, tax, shipping
+  total     Decimal  @db.Decimal(10,2)
+  currency  String   @default("PKR")
+  createdAt DateTime @default(now())
+}
+
+// ---------- Cart, order & production ----------
+model Cart {
+  id         String     @id @default(uuid())
+  customerId String
+  customer   Customer   @relation(fields: [customerId], references: [id])
+  items      CartItem[]
+  updatedAt  DateTime   @updatedAt
+}
+
+model CartItem {
+  id         String  @id @default(uuid())
+  cartId     String
+  cart       Cart    @relation(fields: [cartId], references: [id])
+  productId  String
+  variantId  String?
+  config     Json    // chosen options
+  profileId  String? // body profile used
+  fitPref    String?
+  tryOnRef   String?
+  priceQuote Json    // snapshot of the quote at add-time
+}
+
+model Order {
+  id            String          @id @default(uuid())
+  number        String          @unique
+  customerId    String
+  customer      Customer        @relation(fields: [customerId], references: [id])
+  status        String          @default("draft") // draft → measurement_review → customer_approval → payment_complete → measurement_locked → pattern → fabric → cutting → stitching → qc → packing → dispatch → delivered
+  // IMMUTABLE frozen snapshot of the whole order at placement:
+  snapshot      Json
+  price         PriceSnapshot?
+  tasks         ProductionTask[]
+  documents     Document[]
+  createdAt     DateTime        @default(now())
+}
+
+model ProductionTask {
+  id            String   @id @default(uuid())
+  orderId       String
+  order         Order    @relation(fields: [orderId], references: [id])
+  stage         String
+  operatorId    String?
+  priority      Int      @default(0)
+  dueAt         DateTime?
+  notes         String?
+  attachments   Json?
+  statusHistory Json?    // append-only stage transitions
+}
+
+model Document {
+  id      String @id @default(uuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+  type    String // measurement_sheet | tech_pack | bom | cutting | stitching | qc | packing
+  assetRef String // stored PDF/CSV
+  createdAt DateTime @default(now())
+}
+
+// ---------- Try-on & body scan ----------
+model TryOnJob {
+  id            String   @id @default(uuid())
+  customerId    String
+  provider      String   // mock | pictofit | ...
+  status        String   @default("queued") // queued | processing | ready | failed
+  inputAssetId  String?
+  resultAssetId String?
+  consentId     String
+  costCents     Int?
+  createdAt     DateTime @default(now())
+}
+
+model BodyScanJob {
+  id         String   @id @default(uuid())
+  customerId String
+  provider   String
+  status     String   @default("queued")
+  result     Json?    // measurements + confidence
+  createdAt  DateTime @default(now())
+}
+
+// ---------- Privacy, consent & audit ----------
+model ConsentRecord {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  purpose   String   // tryon_image | body_scan | marketing
+  version   String
+  ip        String?
+  grantedAt DateTime @default(now())
+  revokedAt DateTime?
+}
+
+model DataDeletionRequest {
+  id         String   @id @default(uuid())
+  userId     String
+  scope      String   // images | all
+  status     String   @default("pending") // pending | approved | completed | rejected
+  requestedAt DateTime @default(now())
+  handledBy  String?
+}
+
+model AuditLog {
+  id       String   @id @default(uuid())
+  actorId  String?
+  action   String
+  entity   String
+  entityId String?
+  before   Json?
+  after    Json?
+  ip       String?
+  at       DateTime @default(now())
+}
+
+// ---------- Commerce extras ----------
+model Payment {
+  id        String   @id @default(uuid())
+  orderId   String
+  provider  String   // stripe | local | cod
+  status    String
+  amount    Decimal  @db.Decimal(10,2)
+  currency  String   @default("PKR")
+  createdAt DateTime @default(now())
+}
+
+model ReturnRemake {
+  id        String   @id @default(uuid())
+  orderId   String
+  kind      String   // return | remake
+  cause     String   // production_error | customer_measurement | preference_change | defect
+  status    String   @default("open")
+  createdAt DateTime @default(now())
+}
+
+model Coupon {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  kind      String   // percent | fixed
+  value     Decimal  @db.Decimal(10,2)
+  expiresAt DateTime?
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  channel   String   // email | push | in_app
+  template  String
+  payload   Json
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+}
