@@ -1,0 +1,146 @@
+// Tailor Master — Prisma schema (Stage 6 FOUNDATION).
+// This is the REAL schema that migrates. It starts with identity/auth + customer.
+// Catalog, measurement, order, production, etc. are added in their own stages
+// (7+). The full target model is sketched in docs/prisma-schema-sketch.prisma.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------- Identity & access ----------------
+
+model User {
+  id           String          @id @default(uuid())
+  email        String          @unique
+  phone        String?         @unique
+  passwordHash String
+  locale       Locale          @default(en)
+  unit         Unit            @default(in)
+  isActive     Boolean         @default(true)
+  roles        UserRole[]
+  sessions     Session[]
+  customer     Customer?
+  consents     ConsentRecord[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([email])
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  key         RoleKey          @unique
+  label       String
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    String           @id @default(uuid())
+  key   String           @unique // e.g. "order.read", "measurement.lock"
+  roles RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------------- Customer ----------------
+
+model Customer {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName  String?
+  createdAt DateTime @default(now())
+}
+
+// ---------------- Privacy / audit (foundation) ----------------
+
+model ConsentRecord {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   String // tryon_image | body_scan | marketing
+  version   String
+  ip        String?
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id       String   @id @default(uuid())
+  actorId  String?
+  action   String
+  entity   String
+  entityId String?
+  before   Json?
+  after    Json?
+  ip       String?
+  at       DateTime @default(now())
+
+  @@index([entity, entityId])
+}
+
+// ---------------- Enums ----------------
+
+enum Locale {
+  en
+  ur
+  ar
+}
+
+enum Unit {
+  in
+  cm
+}
+
+enum RoleKey {
+  guest
+  customer
+  support
+  tailor
+  measurement_reviewer
+  workshop_operator
+  qc_officer
+  production_manager
+  catalog_manager
+  finance
+  admin
+  super_admin
+}
