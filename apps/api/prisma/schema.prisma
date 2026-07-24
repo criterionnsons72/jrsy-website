@@ -82,13 +82,62 @@ model Session {
 // ---------------- Customer ----------------
 
 model Customer {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String        @id @default(uuid())
+  userId    String        @unique
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName  String?
   carts     Cart[]
   orders    Order[]
-  createdAt DateTime @default(now())
+  profiles  BodyProfile[]
+  createdAt DateTime      @default(now())
+}
+
+// ---------------- Measurement & sizing ----------------
+
+model BodyProfile {
+  id               String         @id @default(uuid())
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label            String // "Mine", "Son", "Office uniform"…
+  heightCm         Float?
+  weightKg         Float?
+  fitPreference    FitPreference  @default(regular)
+  verifiedByTailor Boolean        @default(false)
+  measurements     Measurement[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([customerId])
+}
+
+model Measurement {
+  id           String             @id @default(uuid())
+  profileId    String
+  profile      BodyProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  kind         MeasurementKind // body | garment | final
+  source       MeasurementSource  @default(manual)
+  // Measurement values are stored in centimetres (unit conversion at the edge).
+  values       Json // { chest: 100, waist: 88, ... }
+  outlierFlags Json? // { chest: "high", ... }
+  confidence   Int? // 0-100
+  lockedAt     DateTime? // set when approved for production
+  reviews      MeasurementReview[]
+  createdAt    DateTime           @default(now())
+
+  @@index([profileId])
+}
+
+model MeasurementReview {
+  id            String       @id @default(uuid())
+  measurementId String
+  measurement   Measurement  @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  status        ReviewStatus @default(pending)
+  reviewerId    String? // user id of tailor / reviewer
+  notes         String?
+  createdAt     DateTime     @default(now())
+  decidedAt     DateTime?
+
+  @@index([status])
 }
 
 // ---------------- Catalog ----------------
@@ -285,6 +334,32 @@ enum Locale {
 enum Unit {
   in
   cm
+}
+
+enum FitPreference {
+  slim
+  regular
+  relaxed
+}
+
+enum MeasurementKind {
+  body
+  garment
+  final
+}
+
+enum MeasurementSource {
+  manual
+  garment
+  questionnaire
+  scan
+  in_store
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
 }
 
 enum FabricStretch {

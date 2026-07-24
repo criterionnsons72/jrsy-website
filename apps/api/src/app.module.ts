@@ -9,6 +9,7 @@ import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
 import { ConfiguratorModule } from './modules/configurator/configurator.module';
 import { PricingModule } from './modules/pricing/pricing.module';
+import { MeasurementModule } from './modules/measurement/measurement.module';
 
 @Module({
   imports: [
@@ -26,8 +27,9 @@ import { PricingModule } from './modules/pricing/pricing.module';
     // Stage 8 — Customization Engine:
     ConfiguratorModule,
     PricingModule,
-    // Stage 9+ modules (measurement, tryon, checkout, production, documents…)
-    // are added here.
+    // Stage 9 — Measurement & Sizing:
+    MeasurementModule,
+    // Stage 10+ modules (tryon, checkout, production, documents…) go here.
   ],
 })
 export class AppModule {}
