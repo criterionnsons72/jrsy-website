@@ -1,0 +1,141 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---- Design tokens (from docs/design-tokens.css) ----
+   Fonts are self-hosted via @font-face in production (no CDN — CSP-safe).
+   Values render with system fallbacks until the faces are added. */
+:root {
+  --tm-paper: #f7f4ee;
+  --tm-surface: #ffffff;
+  --tm-surface-2: #fbf9f4;
+  --tm-ink: #23211c;
+  --tm-muted: #6b6558;
+  --tm-faint: #9a9384;
+  --tm-line: #e6e0d4;
+  --tm-line-strong: #d3cbbb;
+
+  --tm-brand: #2b3a67;
+  --tm-brand-strong: #1e2a4e;
+  --tm-brand-tint: #e9ecf5;
+  --tm-on-brand: #ffffff;
+  --tm-brass: #a67c2e;
+  --tm-brass-strong: #875f1c;
+  --tm-brass-tint: #f3ead6;
+
+  --tm-preview: #6d4fb0;
+  --tm-preview-tint: #ece6f7;
+  --tm-fit: #1f6e7e;
+  --tm-fit-tint: #dcedf0;
+  --tm-mtm: #8a2f52;
+  --tm-mtm-tint: #f6e1e9;
+
+  --tm-good: #2c7a50;
+  --tm-good-tint: #dceee3;
+  --tm-warn: #8a5e12;
+  --tm-warn-tint: #f4e9cf;
+  --tm-crit: #a02b37;
+  --tm-crit-tint: #f6e0e1;
+
+  --tm-r-sm: 6px;
+  --tm-r: 10px;
+  --tm-r-lg: 16px;
+  --tm-shadow: 0 1px 2px rgba(30, 26, 20, 0.05), 0 8px 24px -14px rgba(30, 26, 20, 0.28);
+  --tm-shadow-lg: 0 24px 60px -24px rgba(20, 25, 50, 0.45);
+
+  --tm-font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --tm-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  --tm-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --tm-font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+  /* Swapped to the Urdu stack by LocaleProvider when locale = ur. */
+  --tm-active-font: var(--tm-font-sans);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tm-paper: #171611;
+    --tm-surface: #211f19;
+    --tm-surface-2: #1b1a14;
+    --tm-ink: #ece8de;
+    --tm-muted: #a29a8b;
+    --tm-faint: #6f6858;
+    --tm-line: #322f27;
+    --tm-line-strong: #433f34;
+    --tm-brand: #8fa1d8;
+    --tm-brand-strong: #a9b7e4;
+    --tm-brand-tint: #232b45;
+    --tm-on-brand: #141726;
+    --tm-brass: #cba65e;
+    --tm-brass-strong: #ddbb77;
+    --tm-brass-tint: #322913;
+    --tm-preview: #ad93e6;
+    --tm-preview-tint: #251e3a;
+    --tm-fit: #5fb2c2;
+    --tm-fit-tint: #123030;
+    --tm-mtm: #d888a3;
+    --tm-mtm-tint: #331921;
+    --tm-good: #6bbe88;
+    --tm-good-tint: #153021;
+    --tm-warn: #cfa24c;
+    --tm-warn-tint: #332913;
+    --tm-crit: #de8891;
+    --tm-crit-tint: #331a1d;
+  }
+}
+
+:root[data-theme='dark'] {
+  --tm-paper: #171611;
+  --tm-surface: #211f19;
+  --tm-surface-2: #1b1a14;
+  --tm-ink: #ece8de;
+  --tm-muted: #a29a8b;
+  --tm-faint: #6f6858;
+  --tm-line: #322f27;
+  --tm-line-strong: #433f34;
+  --tm-brand: #8fa1d8;
+  --tm-brand-strong: #a9b7e4;
+  --tm-brand-tint: #232b45;
+  --tm-on-brand: #141726;
+  --tm-brass: #cba65e;
+  --tm-brass-strong: #ddbb77;
+  --tm-brass-tint: #322913;
+  --tm-preview: #ad93e6;
+  --tm-preview-tint: #251e3a;
+  --tm-fit: #5fb2c2;
+  --tm-fit-tint: #123030;
+  --tm-mtm: #d888a3;
+  --tm-mtm-tint: #331921;
+  --tm-good: #6bbe88;
+  --tm-good-tint: #153021;
+  --tm-warn: #cfa24c;
+  --tm-warn-tint: #332913;
+  --tm-crit: #de8891;
+  --tm-crit-tint: #331a1d;
+}
+
+html,
+body {
+  background: var(--tm-paper);
+  color: var(--tm-ink);
+  font-family: var(--tm-active-font);
+}
+
+/* Urdu/Arabic get a little more line-height for Nastaliq/Naskh legibility. */
+:root[dir='rtl'] body {
+  line-height: 1.9;
+}
+
+/* Always-visible keyboard focus. */
+:focus-visible {
+  outline: 2px solid var(--tm-brand);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

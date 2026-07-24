@@ -1,0 +1,78 @@
+/* Tailor Master — Design Tokens (Stage 4)
+   Source of truth for colors, type, spacing, radius, elevation.
+   Consumed by the Tailwind theme in Stage 6. Light + dark.
+   NOTE: fonts are self-hosted via @font-face in production (no CDN — CSP-safe). */
+
+:root {
+  /* ---- Neutrals: pattern paper ---- */
+  --tm-paper: #F7F4EE;
+  --tm-surface: #FFFFFF;
+  --tm-surface-2: #FBF9F4;
+  --tm-ink: #23211C;
+  --tm-muted: #6B6558;
+  --tm-faint: #9A9384;
+  --tm-line: #E6E0D4;
+  --tm-line-strong: #D3CBBB;
+
+  /* ---- Brand ---- */
+  --tm-brand: #2B3A67;
+  --tm-brand-strong: #1E2A4E;
+  --tm-brand-tint: #E9ECF5;
+  --tm-on-brand: #FFFFFF;
+  --tm-brass: #A67C2E;
+  --tm-brass-strong: #875F1C;
+  --tm-brass-tint: #F3EAD6;
+
+  /* ---- Functional lanes ---- */
+  --tm-preview: #6D4FB0;  --tm-preview-tint: #ECE6F7;
+  --tm-fit: #1F6E7E;      --tm-fit-tint: #DCEDF0;
+  --tm-mtm: #8A2F52;      --tm-mtm-tint: #F6E1E9;
+
+  /* ---- Semantic ---- */
+  --tm-good: #2C7A50;  --tm-good-tint: #DCEEE3;
+  --tm-warn: #8A5E12;  --tm-warn-tint: #F4E9CF;
+  --tm-crit: #A02B37;  --tm-crit-tint: #F6E0E1;
+
+  /* ---- Radius / spacing / elevation ---- */
+  --tm-r-sm: 6px;  --tm-r: 10px;  --tm-r-lg: 16px;  --tm-r-pill: 999px;
+  --tm-space: 8px; /* base unit; scale = 4,8,14,20,32,52 */
+  --tm-shadow: 0 1px 2px rgba(30,26,20,.05), 0 8px 24px -14px rgba(30,26,20,.28);
+  --tm-shadow-lg: 0 24px 60px -24px rgba(20,25,50,.45);
+
+  /* ---- Type ---- */
+  --tm-font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --tm-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  --tm-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --tm-font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+  --tm-font-arabic: 'Noto Naskh Arabic', 'Noto Sans Arabic', serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --tm-paper: #171611; --tm-surface: #211F19; --tm-surface-2: #1B1A14;
+    --tm-ink: #ECE8DE; --tm-muted: #A29A8B; --tm-faint: #6F6858;
+    --tm-line: #322F27; --tm-line-strong: #433F34;
+    --tm-brand: #8FA1D8; --tm-brand-strong: #A9B7E4; --tm-brand-tint: #232B45; --tm-on-brand: #141726;
+    --tm-brass: #CBA65E; --tm-brass-strong: #DDBB77; --tm-brass-tint: #322913;
+    --tm-preview: #AD93E6; --tm-preview-tint: #251E3A;
+    --tm-fit: #5FB2C2; --tm-fit-tint: #123030;
+    --tm-mtm: #D888A3; --tm-mtm-tint: #331921;
+    --tm-good: #6BBE88; --tm-good-tint: #153021;
+    --tm-warn: #CFA24C; --tm-warn-tint: #332913;
+    --tm-crit: #DE8891; --tm-crit-tint: #331A1D;
+  }
+}
+
+:root[data-theme="dark"] {
+  --tm-paper: #171611; --tm-surface: #211F19; --tm-surface-2: #1B1A14;
+  --tm-ink: #ECE8DE; --tm-muted: #A29A8B; --tm-faint: #6F6858;
+  --tm-line: #322F27; --tm-line-strong: #433F34;
+  --tm-brand: #8FA1D8; --tm-brand-strong: #A9B7E4; --tm-brand-tint: #232B45; --tm-on-brand: #141726;
+  --tm-brass: #CBA65E; --tm-brass-strong: #DDBB77; --tm-brass-tint: #322913;
+  --tm-preview: #AD93E6; --tm-preview-tint: #251E3A;
+  --tm-fit: #5FB2C2; --tm-fit-tint: #123030;
+  --tm-mtm: #D888A3; --tm-mtm-tint: #331921;
+  --tm-good: #6BBE88; --tm-good-tint: #153021;
+  --tm-warn: #CFA24C; --tm-warn-tint: #332913;
+  --tm-crit: #DE8891; --tm-crit-tint: #331A1D;
+}

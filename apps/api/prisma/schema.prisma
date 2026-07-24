@@ -1,0 +1,562 @@
+// Tailor Master — Prisma schema.
+// Stage 6: identity/customer foundation.
+// Stage 7: ecommerce core (catalog, cart, order shell) — this file.
+// Later stages add configurator rules, measurement, tryon, production, etc.
+// Target model sketched in docs/prisma-schema-sketch.prisma.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------- Identity & access ----------------
+
+model User {
+  id           String          @id @default(uuid())
+  email        String          @unique
+  phone        String?         @unique
+  passwordHash String
+  locale       Locale          @default(en)
+  unit         Unit            @default(in)
+  isActive     Boolean         @default(true)
+  roles        UserRole[]
+  sessions     Session[]
+  customer     Customer?
+  consents     ConsentRecord[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([email])
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  key         RoleKey          @unique
+  label       String
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id    String           @id @default(uuid())
+  key   String           @unique
+  roles RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Session {
+  id               String    @id @default(uuid())
+  userId           String
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenHash String
+  userAgent        String?
+  ip               String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([userId])
+}
+
+// ---------------- Customer ----------------
+
+model Customer {
+  id           String        @id @default(uuid())
+  userId       String        @unique
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName     String?
+  carts        Cart[]
+  orders       Order[]
+  profiles     BodyProfile[]
+  addresses    Address[]
+  tryOnJobs    TryOnJob[]
+  bodyScanJobs BodyScanJob[]
+  createdAt    DateTime      @default(now())
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  fullName   String
+  phone      String
+  line       String
+  city       String
+  postalCode String?
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([customerId])
+}
+
+// ---------------- Virtual Try-On & Body Scan ----------------
+
+model TryOnJob {
+  id            String      @id @default(uuid())
+  customerId    String
+  customer      Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  productId     String?
+  provider      String      @default("mock")
+  status        TryOnStatus @default(queued)
+  // Asset references (object-storage keys). Served only via signed, short-lived URLs.
+  inputAssetKey String?
+  resultAssetKey String?
+  consentId     String
+  attempts      Int         @default(0)
+  error         String?
+  costCents     Int         @default(0)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model BodyScanJob {
+  id         String      @id @default(uuid())
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  provider   String      @default("mock")
+  status     TryOnStatus @default(queued)
+  consentId  String
+  result     Json? // measurements + confidence
+  costCents  Int         @default(0)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  deletedAt  DateTime?
+
+  @@index([customerId])
+}
+
+// ---------------- Measurement & sizing ----------------
+
+model BodyProfile {
+  id               String         @id @default(uuid())
+  customerId       String
+  customer         Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  label            String // "Mine", "Son", "Office uniform"…
+  heightCm         Float?
+  weightKg         Float?
+  fitPreference    FitPreference  @default(regular)
+  verifiedByTailor Boolean        @default(false)
+  measurements     Measurement[]
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([customerId])
+}
+
+model Measurement {
+  id           String             @id @default(uuid())
+  profileId    String
+  profile      BodyProfile        @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  kind         MeasurementKind // body | garment | final
+  source       MeasurementSource  @default(manual)
+  // Measurement values are stored in centimetres (unit conversion at the edge).
+  values       Json // { chest: 100, waist: 88, ... }
+  outlierFlags Json? // { chest: "high", ... }
+  confidence   Int? // 0-100
+  lockedAt     DateTime? // set when approved for production
+  reviews      MeasurementReview[]
+  createdAt    DateTime           @default(now())
+
+  @@index([profileId])
+}
+
+model MeasurementReview {
+  id            String       @id @default(uuid())
+  measurementId String
+  measurement   Measurement  @relation(fields: [measurementId], references: [id], onDelete: Cascade)
+  status        ReviewStatus @default(pending)
+  reviewerId    String? // user id of tailor / reviewer
+  notes         String?
+  createdAt     DateTime     @default(now())
+  decidedAt     DateTime?
+
+  @@index([status])
+}
+
+// ---------------- Catalog ----------------
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique
+  sortOrder Int      @default(0)
+  products Product[]
+}
+
+model Product {
+  id             String           @id @default(uuid())
+  categoryId     String
+  category       Category         @relation(fields: [categoryId], references: [id])
+  title          String
+  slug           String           @unique
+  description    String?
+  basePrice      Decimal          @db.Decimal(10, 2)
+  currency       String           @default("PKR")
+  madeToMeasure  Boolean          @default(true)
+  readySize      Boolean          @default(true)
+  isActive       Boolean          @default(true)
+  configSchemaId String?
+  configSchema   ConfigSchema?    @relation(fields: [configSchemaId], references: [id])
+  images         ProductImage[]
+  variants       ProductVariant[]
+  fabrics        ProductFabric[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+// ---------------- Customization (configurator) ----------------
+
+model ConfigSchema {
+  id          String    @id @default(uuid())
+  name        String
+  version     Int       @default(1)
+  // Schema-driven option groups and the rules engine definition (JSONB).
+  definition  Json
+  isPublished Boolean   @default(false)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([name, version])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+}
+
+model ProductVariant {
+  id         String  @id @default(uuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku        String  @unique
+  sizeLabel  String? // ready size (S–XXL); null => made-to-measure only
+  priceDelta Decimal @default(0) @db.Decimal(10, 2)
+  isActive   Boolean @default(true)
+}
+
+model Fabric {
+  id           String          @id @default(uuid())
+  name         String
+  stretch      FabricStretch   @default(non_stretch)
+  weightGsm    Int?
+  pricePerUnit Decimal         @default(0) @db.Decimal(10, 2)
+  colorHex     String?
+  isActive     Boolean         @default(true)
+  products     ProductFabric[]
+}
+
+model ProductFabric {
+  productId String
+  fabricId  String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  fabric    Fabric  @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+
+  @@id([productId, fabricId])
+}
+
+// ---------------- Cart ----------------
+
+model Cart {
+  id         String     @id @default(uuid())
+  customerId String     @unique
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items      CartItem[]
+  updatedAt  DateTime   @updatedAt
+  createdAt  DateTime   @default(now())
+}
+
+model CartItem {
+  id              String   @id @default(uuid())
+  cartId          String
+  cart            Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId       String
+  variantId       String?
+  quantity        Int      @default(1)
+  // Snapshot of the price at add-time so the cart is stable if catalog prices change.
+  unitPrice       Decimal  @db.Decimal(10, 2)
+  currency        String   @default("PKR")
+  // Configuration/measurement references are filled by later stages (configurator, measurement).
+  config          Json?
+  bodyProfileId   String?
+  fitPreference   String?
+  tryOnRef        String?
+  createdAt       DateTime @default(now())
+
+  @@index([cartId])
+}
+
+// ---------------- Order (shell) ----------------
+
+model Order {
+  id         String      @id @default(uuid())
+  number     String      @unique
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  status     OrderStatus @default(draft)
+  currency   String      @default("PKR")
+  subtotal   Decimal     @db.Decimal(10, 2)
+  total      Decimal     @db.Decimal(10, 2)
+  // Immutable snapshot of the whole order at placement (expanded in later stages).
+  snapshot   Json
+  items      OrderItem[]
+  task       ProductionTask?
+  documents  Document[]
+  payment    Payment?
+  shipping   Decimal     @default(0) @db.Decimal(10, 2)
+  tax        Decimal     @default(0) @db.Decimal(10, 2)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @unique
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider      String        @default("mock")
+  method        String // card | cod
+  status        PaymentStatus @default(pending)
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("PKR")
+  providerRef   String?
+  createdAt     DateTime      @default(now())
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  variantId  String?
+  title      String // captured at order time
+  quantity   Int     @default(1)
+  unitPrice  Decimal @db.Decimal(10, 2)
+  lineTotal  Decimal @db.Decimal(10, 2)
+  config     Json?
+}
+
+// ---------------- Production & workshop ----------------
+
+model ProductionTask {
+  id               String    @id @default(uuid())
+  orderId          String    @unique
+  order            Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  code             String    @unique // barcode / QR value (= order number)
+  stage            OrderStatus
+  operatorId       String? // assigned workshop operator (user id)
+  priority         Int       @default(0) // higher = more urgent
+  dueAt            DateTime?
+  notes            String?
+  attachments      Json? // array of asset refs
+  statusHistory    Json // append-only [{ stage, at, byId }]
+  qcPassed         Boolean?
+  qcNotes          String?
+  finalMeasurements Json? // measured on the finished garment
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([stage])
+  @@index([operatorId])
+}
+
+model Document {
+  id        String       @id @default(uuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      DocumentType
+  content   Json // structured content (rendered to PDF by a worker)
+  assetRef  String? // stored PDF/CSV once rendered
+  createdAt DateTime     @default(now())
+
+  @@unique([orderId, type])
+}
+
+// ---------------- Privacy / audit (foundation) ----------------
+
+model ConsentRecord {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purpose   String
+  version   String
+  ip        String?
+  grantedAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  @@index([userId])
+}
+
+model AuditLog {
+  id       String   @id @default(uuid())
+  actorId  String?
+  action   String
+  entity   String
+  entityId String?
+  before   Json?
+  after    Json?
+  ip       String?
+  at       DateTime @default(now())
+
+  @@index([entity, entityId])
+}
+
+// ---------------- Analytics & promotions ----------------
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String // product_view | configurator_start | configurator_complete | measurement_start | measurement_complete | tryon_request | tryon_success | tryon_failure | add_to_cart | order_placed | ...
+  userId    String?
+  sessionId String?
+  props     Json?
+  at        DateTime @default(now())
+
+  @@index([type])
+  @@index([at])
+}
+
+model Coupon {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  kind      String    @default("percent") // percent | fixed
+  value     Decimal   @db.Decimal(10, 2)
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// ---------------- Enums ----------------
+
+enum Locale {
+  en
+  ur
+  ar
+}
+
+enum Unit {
+  in
+  cm
+}
+
+enum FitPreference {
+  slim
+  regular
+  relaxed
+}
+
+enum MeasurementKind {
+  body
+  garment
+  final
+}
+
+enum MeasurementSource {
+  manual
+  garment
+  questionnaire
+  scan
+  in_store
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+}
+
+enum TryOnStatus {
+  queued
+  processing
+  ready
+  failed
+  deleted
+}
+
+enum DocumentType {
+  measurement_sheet
+  tech_pack
+  bom
+  fabric_consumption
+  cutting
+  stitching
+  qc
+  packing
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  refunded
+}
+
+enum FabricStretch {
+  stretch
+  non_stretch
+}
+
+enum RoleKey {
+  guest
+  customer
+  support
+  tailor
+  measurement_reviewer
+  workshop_operator
+  qc_officer
+  production_manager
+  catalog_manager
+  finance
+  admin
+  super_admin
+}
+
+enum OrderStatus {
+  draft
+  measurement_review
+  customer_approval
+  payment_complete
+  measurement_locked
+  pattern_preparation
+  fabric_allocation
+  cutting
+  stitching
+  quality_control
+  packing
+  dispatch
+  delivered
+  cancelled
+}
