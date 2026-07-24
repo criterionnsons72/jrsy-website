@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { clearAuth, getAuth } from '@/lib/auth';
+import { useLocale } from '@/i18n/LocaleProvider';
 
 export function Header() {
   const router = useRouter();
+  const { t, locale, setLocale } = useLocale();
   const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -35,20 +37,20 @@ export function Header() {
           <span className="font-serif text-lg font-semibold text-ink">Tailor Master</span>
         </Link>
 
-        <nav className="ml-auto flex items-center gap-4 font-mono text-xs text-muted">
+        <nav className="ms-auto flex items-center gap-4 font-mono text-xs text-muted">
           <Link href="/catalog" className="hover:text-ink">
-            Catalog
+            {t('nav.catalog')}
           </Link>
           <Link href="/cart" className="hover:text-ink">
-            Cart
+            {t('nav.cart')}
           </Link>
           {email ? (
             <>
               <Link href="/account/profiles" className="hover:text-ink">
-                Account
+                {t('nav.account')}
               </Link>
               <button onClick={signOut} className="text-brand hover:underline">
-                Sign out
+                {t('nav.signOut')}
               </button>
             </>
           ) : (
@@ -56,9 +58,17 @@ export function Header() {
               href="/login"
               className="rounded-sm bg-brand px-3 py-1.5 font-semibold text-white hover:bg-brand-strong"
             >
-              Sign in
+              {t('nav.signIn')}
             </Link>
           )}
+          <button
+            onClick={() => setLocale(locale === 'en' ? 'ur' : 'en')}
+            className="rounded-sm border border-line-strong px-2 py-1 hover:border-brand"
+            aria-label={t('nav.language')}
+            title={t('nav.language')}
+          >
+            {locale === 'en' ? 'اردو' : 'EN'}
+          </button>
         </nav>
       </div>
     </header>

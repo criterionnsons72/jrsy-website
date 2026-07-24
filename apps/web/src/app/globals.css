@@ -47,6 +47,8 @@
   --tm-font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
   --tm-font-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
   --tm-font-urdu: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif;
+  /* Swapped to the Urdu stack by LocaleProvider when locale = ur. */
+  --tm-active-font: var(--tm-font-sans);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -115,7 +117,12 @@ html,
 body {
   background: var(--tm-paper);
   color: var(--tm-ink);
-  font-family: var(--tm-font-sans);
+  font-family: var(--tm-active-font);
+}
+
+/* Urdu/Arabic get a little more line-height for Nastaliq/Naskh legibility. */
+:root[dir='rtl'] body {
+  line-height: 1.9;
 }
 
 /* Always-visible keyboard focus. */
