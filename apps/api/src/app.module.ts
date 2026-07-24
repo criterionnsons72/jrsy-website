@@ -12,6 +12,7 @@ import { PricingModule } from './modules/pricing/pricing.module';
 import { MeasurementModule } from './modules/measurement/measurement.module';
 import { TryOnModule } from './modules/tryon/tryon.module';
 import { ProductionModule } from './modules/production/production.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -35,7 +36,9 @@ import { ProductionModule } from './modules/production/production.module';
     TryOnModule,
     // Stage 11 — Order & Production:
     ProductionModule,
-    // Stage 12+ modules (admin/reporting…) go here.
+    // Stage 12 — Admin & Reporting:
+    AdminModule,
+    // Stage 13+ (security/QA/perf, deployment) follow.
   ],
 })
 export class AppModule {}

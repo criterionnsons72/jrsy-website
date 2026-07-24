@@ -403,6 +403,30 @@ model AuditLog {
   @@index([entity, entityId])
 }
 
+// ---------------- Analytics & promotions ----------------
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  type      String // product_view | configurator_start | configurator_complete | measurement_start | measurement_complete | tryon_request | tryon_success | tryon_failure | add_to_cart | order_placed | ...
+  userId    String?
+  sessionId String?
+  props     Json?
+  at        DateTime @default(now())
+
+  @@index([type])
+  @@index([at])
+}
+
+model Coupon {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  kind      String    @default("percent") // percent | fixed
+  value     Decimal   @db.Decimal(10, 2)
+  isActive  Boolean   @default(true)
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+}
+
 // ---------------- Enums ----------------
 
 enum Locale {
