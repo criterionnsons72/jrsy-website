@@ -16,6 +16,7 @@ import { TryOnModule } from './modules/tryon/tryon.module';
 import { ProductionModule } from './modules/production/production.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
+import { StorageModule } from './modules/storage/storage.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CheckoutModule } from './modules/checkout/checkout.module';
     // Global rate limiting (per IP). Auth routes tighten this further.
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
+    StorageModule,
     HealthModule,
     AuthModule,
     // Stage 7 — Ecommerce Core:

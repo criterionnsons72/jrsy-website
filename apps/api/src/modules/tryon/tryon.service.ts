@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { QualityCheckService, type ImageMeta } from './quality-check.service';
 import {
   BODYSCAN_PROVIDER,
@@ -24,6 +25,7 @@ export class TryOnService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly quality: QualityCheckService,
+    private readonly storage: StorageService,
     @Inject(TRYON_PROVIDER) private readonly tryonProvider: TryOnProvider,
     @Inject(BODYSCAN_PROVIDER) private readonly scanProvider: BodyScanProvider,
   ) {}
@@ -136,11 +138,17 @@ export class TryOnService {
     const customerId = await this.customerId(userId);
     const job = await this.prisma.tryOnJob.findFirst({ where: { id: jobId, customerId } });
     if (!job) throw new NotFoundException('Try-on job not found.');
-    // A real deployment returns a signed, short-lived URL rather than the key.
+
+    // Return a signed, short-lived view URL for the result (never a raw key/public URL).
+    let resultUrl: string | null = null;
+    if (job.status === 'ready' && job.resultAssetKey && this.storage.configured) {
+      resultUrl = await this.storage.presignView(job.resultAssetKey);
+    }
+
     return {
       id: job.id,
       status: job.status,
-      resultAssetKey: job.status === 'ready' ? job.resultAssetKey : null,
+      resultUrl,
       error: job.error,
       disclaimer: this.disclaimer(),
     };
@@ -162,7 +170,9 @@ export class TryOnService {
     if (!job) throw new NotFoundException('Try-on job not found.');
 
     await this.tryonProvider.deleteTryOnAssets({ providerRef: `mock_${job.inputAssetKey}` });
-    // In production: delete the objects from storage here, then null the refs.
+    // Securely delete the objects from storage, then null the refs.
+    await this.storage.deleteObject(job.inputAssetKey);
+    await this.storage.deleteObject(job.resultAssetKey);
 
     await this.prisma.tryOnJob.update({
       where: { id: job.id },

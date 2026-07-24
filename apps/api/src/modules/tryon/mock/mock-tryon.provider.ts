@@ -25,11 +25,13 @@ export class MockTryOnProvider implements TryOnProvider {
   }
 
   async getTryOnResult(ref: ProviderJobRef): Promise<TryOnProviderResult> {
-    // A real provider would return a generated image; the mock returns a
-    // deterministic placeholder result key and a nominal simulated cost.
+    // A real provider returns a newly generated image. The mock echoes the
+    // uploaded image key back (providerRef = `mock_<inputKey>`) so the preview
+    // shows a real, viewable object during development, at a nominal cost.
+    const inputKey = ref.providerRef.replace(/^mock_/, '');
     return {
       status: 'ready',
-      resultAssetKey: `${ref.providerRef}_result.png`,
+      resultAssetKey: inputKey,
       costCents: 5, // simulated per-generation cost for analytics
     };
   }

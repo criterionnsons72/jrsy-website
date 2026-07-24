@@ -18,6 +18,13 @@ export const envSchema = z.object({
   JWT_ACCESS_TTL: z.coerce.number().default(900),
   JWT_REFRESH_TTL: z.coerce.number().default(1209600),
 
+  // Object storage (optional in dev; required for real uploads)
+  S3_ENDPOINT: z.string().optional(),
+  S3_REGION: z.string().default('us-east-1'),
+  S3_BUCKET: z.string().optional(),
+  S3_ACCESS_KEY: z.string().optional(),
+  S3_SECRET_KEY: z.string().optional(),
+
   // Adapters — mock first (see docs/stage-5)
   TRYON_PROVIDER: z.string().default('mock'),
   BODYSCAN_PROVIDER: z.string().default('mock'),
