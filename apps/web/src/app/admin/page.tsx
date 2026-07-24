@@ -82,7 +82,9 @@ export default function AdminPage() {
 
       {report && (
         <div className="mt-8 rounded-lg border border-line bg-surface p-5">
-          <p className="mb-4 font-mono text-xs uppercase tracking-wide text-faint">Conversion funnel</p>
+          <p className="mb-4 font-mono text-xs uppercase tracking-wide text-faint">
+            Conversion funnel
+          </p>
           <div className="flex flex-col gap-2">
             {[
               ['Product views', report.funnels.productViews],
@@ -108,8 +110,8 @@ export default function AdminPage() {
             })}
           </div>
           <p className="mt-4 font-mono text-xs text-muted">
-            Remake rate <b className="text-ink">{report.production.remakeRate}%</b> · Try-on cost total{' '}
-            <b className="text-ink">{money(report.tryOn.totalCostCents / 100)}</b>
+            Remake rate <b className="text-ink">{report.production.remakeRate}%</b> · Try-on cost
+            total <b className="text-ink">{money(report.tryOn.totalCostCents / 100)}</b>
           </p>
         </div>
       )}

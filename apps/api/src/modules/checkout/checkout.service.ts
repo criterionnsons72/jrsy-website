@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PAYMENT_PROVIDER, type PaymentProvider } from './payment.interface';
@@ -109,7 +104,7 @@ export class CheckoutService {
           shipping,
           tax,
           total,
-          snapshot: snapshot as Prisma.InputJsonValue,
+          snapshot: snapshot as unknown as Prisma.InputJsonValue,
           items: { create: items },
           payment: {
             create: {

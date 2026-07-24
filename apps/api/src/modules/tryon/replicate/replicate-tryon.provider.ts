@@ -68,7 +68,11 @@ export class ReplicateTryOnProvider implements TryOnProvider {
         return { status: 'ready', resultUrl: url, costCents: this.estimateCost() };
       }
       if (status === 'failed') {
-        return { status: 'failed', costCents: 0, error: p.error ? String(p.error) : 'Prediction failed.' };
+        return {
+          status: 'failed',
+          costCents: 0,
+          error: p.error ? String(p.error) : 'Prediction failed.',
+        };
       }
       if (Date.now() > deadline) {
         return { status: 'failed', costCents: 0, error: 'Prediction timed out.' };

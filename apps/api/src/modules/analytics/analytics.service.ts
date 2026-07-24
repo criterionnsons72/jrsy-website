@@ -41,8 +41,7 @@ export class AnalyticsService {
       ]);
 
     const ev = (t: string) => eventCounts.find((e) => e.type === t)?._count ?? 0;
-    const ordersDelivered =
-      ordersByStatus.find((o) => o.status === 'delivered')?._count ?? 0;
+    const ordersDelivered = ordersByStatus.find((o) => o.status === 'delivered')?._count ?? 0;
     const ordersPlaced = ordersByStatus.reduce((n, o) => n + o._count, 0);
 
     const rate = (num: number, den: number) => (den > 0 ? Math.round((num / den) * 1000) / 10 : 0);

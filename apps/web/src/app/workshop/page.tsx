@@ -42,7 +42,9 @@ export default function WorkshopPage() {
   const load = useCallback(async () => {
     const t = token();
     if (!t) return setStatus('auth');
-    const res = await fetch('/api/v1/production/queue', { headers: { Authorization: `Bearer ${t}` } });
+    const res = await fetch('/api/v1/production/queue', {
+      headers: { Authorization: `Bearer ${t}` },
+    });
     if (res.status === 403) return setStatus('forbidden');
     if (!res.ok) return setStatus('forbidden');
     setTasks(await res.json());
@@ -87,7 +89,9 @@ export default function WorkshopPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-5 py-12">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight text-ink">Production queue</h1>
+      <h1 className="font-serif text-3xl font-semibold tracking-tight text-ink">
+        Production queue
+      </h1>
       <div className="mt-3 flex flex-wrap gap-2">
         {delayed > 0 && (
           <span className="rounded-full bg-crit-tint px-3 py-1 font-mono text-xs text-crit">

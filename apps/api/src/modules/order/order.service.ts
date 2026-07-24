@@ -50,10 +50,7 @@ export class OrderService {
       };
     });
 
-    const subtotal = items.reduce(
-      (sum, i) => sum.add(i.lineTotal),
-      new Prisma.Decimal(0),
-    );
+    const subtotal = items.reduce((sum, i) => sum.add(i.lineTotal), new Prisma.Decimal(0));
 
     const number = `TM-${Date.now().toString(36).toUpperCase()}`;
 

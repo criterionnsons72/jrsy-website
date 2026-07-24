@@ -22,7 +22,12 @@ export class AnalyticsController {
   @Post('events')
   track(@Body() dto: TrackDto, @Req() req: Request) {
     const userId = (req.user as { id?: string } | undefined)?.id;
-    return this.analytics.track({ type: dto.type, sessionId: dto.sessionId, props: dto.props, userId });
+    return this.analytics.track({
+      type: dto.type,
+      sessionId: dto.sessionId,
+      props: dto.props,
+      userId,
+    });
   }
 
   @ApiBearerAuth()

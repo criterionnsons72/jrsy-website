@@ -63,9 +63,9 @@ export const configDefinitionSchema = z.object({
 
 export type ValidatedConfigDefinition = z.infer<typeof configDefinitionSchema>;
 
-export function validateConfigDefinition(input: unknown):
-  | { ok: true; value: ValidatedConfigDefinition }
-  | { ok: false; errors: string[] } {
+export function validateConfigDefinition(
+  input: unknown,
+): { ok: true; value: ValidatedConfigDefinition } | { ok: false; errors: string[] } {
   const parsed = configDefinitionSchema.safeParse(input);
   if (parsed.success) return { ok: true, value: parsed.data };
   return {

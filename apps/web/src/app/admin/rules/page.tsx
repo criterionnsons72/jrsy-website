@@ -61,6 +61,8 @@ export default function RuleEditorPage() {
     if (res.status === 403) return setStatus('forbidden');
     if (res.ok) setSchemas(await res.json());
     setStatus('ready');
+    // token()/h() read localStorage at call time; safe to omit from deps.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -162,7 +164,9 @@ export default function RuleEditorPage() {
               key={s.id}
               onClick={() => open(s.id)}
               className={`rounded-lg border px-3 py-2 text-left text-sm ${
-                selId === s.id ? 'border-brand bg-brand-tint text-brand' : 'border-line text-ink hover:border-brand'
+                selId === s.id
+                  ? 'border-brand bg-brand-tint text-brand'
+                  : 'border-line text-ink hover:border-brand'
               }`}
             >
               <span className="font-medium">{s.name}</span>
@@ -221,9 +225,7 @@ export default function RuleEditorPage() {
                       <option value="boolean">boolean</option>
                     </select>
                     <button
-                      onClick={() =>
-                        patch({ groups: def.groups.filter((_, i) => i !== gi) })
-                      }
+                      onClick={() => patch({ groups: def.groups.filter((_, i) => i !== gi) })}
                       className="ms-auto font-mono text-xs text-crit hover:underline"
                     >
                       remove
@@ -233,7 +235,10 @@ export default function RuleEditorPage() {
                   {g.type === 'select' && (
                     <div className="mt-3 flex flex-col gap-2">
                       {(g.choices ?? []).map((c, ci) => (
-                        <div key={ci} className="flex flex-wrap items-center gap-2 rounded bg-surface-2 p-2">
+                        <div
+                          key={ci}
+                          className="flex flex-wrap items-center gap-2 rounded bg-surface-2 p-2"
+                        >
                           <input
                             value={c.label}
                             onChange={(e) => patchChoice(gi, ci, { label: e.target.value })}
@@ -252,7 +257,9 @@ export default function RuleEditorPage() {
                               type="number"
                               value={c.priceDelta ?? ''}
                               onChange={(e) =>
-                                patchChoice(gi, ci, { priceDelta: e.target.value ? Number(e.target.value) : undefined })
+                                patchChoice(gi, ci, {
+                                  priceDelta: e.target.value ? Number(e.target.value) : undefined,
+                                })
                               }
                               className="ms-1 w-16 rounded-sm border border-line-strong bg-surface px-1 py-1"
                             />
@@ -263,7 +270,9 @@ export default function RuleEditorPage() {
                               type="number"
                               value={c.leadTimeDays ?? ''}
                               onChange={(e) =>
-                                patchChoice(gi, ci, { leadTimeDays: e.target.value ? Number(e.target.value) : undefined })
+                                patchChoice(gi, ci, {
+                                  leadTimeDays: e.target.value ? Number(e.target.value) : undefined,
+                                })
                               }
                               className="ms-1 w-12 rounded-sm border border-line-strong bg-surface px-1 py-1"
                             />
@@ -272,13 +281,17 @@ export default function RuleEditorPage() {
                             <input
                               type="checkbox"
                               checked={Boolean(c.requiresApproval)}
-                              onChange={(e) => patchChoice(gi, ci, { requiresApproval: e.target.checked })}
+                              onChange={(e) =>
+                                patchChoice(gi, ci, { requiresApproval: e.target.checked })
+                              }
                             />
                             approval
                           </label>
                           <button
                             onClick={() =>
-                              patchGroup(gi, { choices: (g.choices ?? []).filter((_, j) => j !== ci) })
+                              patchGroup(gi, {
+                                choices: (g.choices ?? []).filter((_, j) => j !== ci),
+                              })
                             }
                             className="ms-auto font-mono text-xs text-crit"
                           >
@@ -289,7 +302,10 @@ export default function RuleEditorPage() {
                       <button
                         onClick={() =>
                           patchGroup(gi, {
-                            choices: [...(g.choices ?? []), { id: `opt${(g.choices?.length ?? 0) + 1}`, label: 'New option' }],
+                            choices: [
+                              ...(g.choices ?? []),
+                              { id: `opt${(g.choices?.length ?? 0) + 1}`, label: 'New option' },
+                            ],
                           })
                         }
                         className="w-fit rounded-sm border border-line-strong px-2 py-1 font-mono text-xs text-muted hover:border-brand"
@@ -307,7 +323,11 @@ export default function RuleEditorPage() {
                           <input
                             type="number"
                             value={g[k] ?? ''}
-                            onChange={(e) => patchGroup(gi, { [k]: e.target.value ? Number(e.target.value) : undefined } as Partial<Group>)}
+                            onChange={(e) =>
+                              patchGroup(gi, {
+                                [k]: e.target.value ? Number(e.target.value) : undefined,
+                              } as Partial<Group>)
+                            }
                             className="ms-1 w-16 rounded-sm border border-line-strong bg-surface px-1 py-1"
                           />
                         </label>
@@ -330,7 +350,12 @@ export default function RuleEditorPage() {
                   patch({
                     groups: [
                       ...def.groups,
-                      { key: `group${def.groups.length + 1}`, label: 'New group', type: 'select', choices: [] },
+                      {
+                        key: `group${def.groups.length + 1}`,
+                        label: 'New group',
+                        type: 'select',
+                        choices: [],
+                      },
                     ],
                   })
                 }
@@ -379,7 +404,10 @@ function RulesEditor({ def, setDef }: { def: Definition; setDef: (d: Definition)
       {rules.map((r, ri) => {
         const action = (r.then[0]?.action as string) ?? 'requireApproval';
         return (
-          <div key={ri} className="mb-2 flex flex-wrap items-center gap-2 rounded bg-surface-2 p-2 text-xs">
+          <div
+            key={ri}
+            className="mb-2 flex flex-wrap items-center gap-2 rounded bg-surface-2 p-2 text-xs"
+          >
             <span className="font-mono text-muted">WHEN</span>
             <input
               value={r.when[0]?.group ?? ''}
@@ -456,7 +484,14 @@ function RulesEditor({ def, setDef }: { def: Definition; setDef: (d: Definition)
         onClick={() =>
           setDef({
             ...def,
-            rules: [...rules, { id: `rule${rules.length + 1}`, when: [{ group: '', equals: '' }], then: [{ action: 'requireApproval' }] }],
+            rules: [
+              ...rules,
+              {
+                id: `rule${rules.length + 1}`,
+                when: [{ group: '', equals: '' }],
+                then: [{ action: 'requireApproval' }],
+              },
+            ],
           })
         }
         className="rounded-sm border border-line-strong px-2 py-1 font-mono text-xs text-muted hover:border-brand"

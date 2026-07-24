@@ -120,7 +120,10 @@ export default function ConfigurePage({ params }: { params: { slug: string } }) 
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
-      <Link href={`/product/${params.slug}`} className="font-mono text-xs text-muted hover:text-ink">
+      <Link
+        href={`/product/${params.slug}`}
+        className="font-mono text-xs text-muted hover:text-ink"
+      >
         ← Back to product
       </Link>
       <h1 className="mt-4 font-serif text-3xl font-semibold tracking-tight text-ink">

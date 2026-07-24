@@ -10,14 +10,17 @@
 ---
 
 ## 1. Objective
+
 Create the repository skeleton everything else builds on: monorepo layout, environment config, database foundation + first-migration-ready schema, authentication foundation, CI/CD, coding standards, and a README — with the Stage 4 design tokens wired into the web app's Tailwind theme.
 
 ## 2. Deliverables (all committed)
+
 Repository structure · environment configuration · database foundation (Prisma) · authentication foundation (JWT + argon2) · CI/CD (GitHub Actions) · coding standards (`CONTRIBUTING.md`) · README.
 
 ## 3. What was created
 
 ### Root
+
 - `package.json` — npm workspaces (`apps/*`, `packages/*`), shared scripts (dev/build/lint/typecheck/test/format).
 - `.gitignore`, `.editorconfig`, `.prettierrc.json`, `.prettierignore`.
 - `.env.example` — dev infra credentials.
@@ -26,6 +29,7 @@ Repository structure · environment configuration · database foundation (Prisma
 - `README.md`, `CONTRIBUTING.md` (coding standards + architecture rules).
 
 ### `apps/api` — NestJS modular monolith
+
 - `package.json`, `tsconfig.json` (strict), `nest-cli.json`, `.eslintrc.cjs`, `jest.config.js`, `.env.example`.
 - `prisma/schema.prisma` — **foundation schema**: User, Role, Permission, UserRole, RolePermission, Session, Customer, ConsentRecord, AuditLog + enums (Locale, Unit, RoleKey with all 12 roles).
 - `src/main.ts` — bootstraps with global `/api/v1` prefix, Helmet, CORS, global ValidationPipe (whitelist + transform), Swagger at `/docs`.
@@ -35,6 +39,7 @@ Repository structure · environment configuration · database foundation (Prisma
 - `src/modules/identity/` — **auth foundation**: register/login/`me`, argon2 password hashing, JWT access+refresh, hashed refresh sessions (revocable), JWT passport strategy + guard, validated DTOs.
 
 ### `apps/web` — Next.js PWA
+
 - `package.json`, `tsconfig.json`, `next.config.mjs` (API proxy rewrite), `postcss.config.js`, `.eslintrc.json`, `.env.example`.
 - `tailwind.config.ts` — **Stage 4 tokens wired** as Tailwind colors/fonts/radius/shadow via CSS variables; dark mode via `[data-theme="dark"]`.
 - `src/app/globals.css` — full token set (light + dark), `prefers-reduced-motion` guard.
@@ -57,6 +62,7 @@ npm run dev                            # web :3000 · api :3001
 ```
 
 **Verify:**
+
 - `GET http://localhost:3001/api/v1/health` → `{ status: "ok", db: "ok", ... }`
 - `http://localhost:3001/docs` → Swagger UI (auth + health)
 - `POST /api/v1/auth/register` then `POST /api/v1/auth/login` → returns access + refresh tokens
@@ -65,6 +71,7 @@ npm run dev                            # web :3000 · api :3001
 - CI runs the same lint → typecheck → test → build chain on push/PR.
 
 ## 5. Verification done in this environment
+
 - File structure created and reviewed.
 - All JSON/config files validated as parseable (package.json ×3, tsconfigs, manifest, eslint, prettier).
 - CI workflow structure checked.
@@ -75,22 +82,27 @@ npm run dev                            # web :3000 · api :3001
 ## Completion Report — Stage 6
 
 **Completed**
+
 - Monorepo (npm workspaces), env config, Prisma foundation schema, JWT auth foundation, health check, CI/CD, coding standards, README, Tailwind theme with Stage 4 tokens, branding footer.
 
 **Pending**
+
 - Your approval to proceed to Stage 7 (Ecommerce Core).
 - Local `npm install` + first `prisma migrate` on your machine (or CI) to generate the migration.
 
 **Risks**
+
 - Dependency versions may need minor bumps at install time (pinned to recent majors).
 - Prisma client types only exist after `db:generate` — the CI step handles this before typecheck.
 
 **Decisions required**
+
 1. Approve the monorepo + auth foundation.
 2. Package manager: **npm workspaces** (current) — OK, or prefer pnpm?
 3. Confirm API base path `/api/v1` and web dev proxy.
 
 **Manual Actions Required**
+
 - Add real PWA icons at `apps/web/public/icons/icon-192.png` and `icon-512.png` (referenced by the manifest; placeholders 404 until added).
 - Provide/self-host the licensed fonts (Fraunces, IBM Plex Mono, Noto Nastaliq/Naskh) as `@font-face` in a later polish step — all are open-source.
 - Rotate the example JWT secrets before any non-local deploy (`openssl rand -base64 48`).

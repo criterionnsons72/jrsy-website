@@ -13,7 +13,12 @@ function svc(prisma: Partial<PrismaService>): CheckoutService {
 describe('CheckoutService', () => {
   it('rejects when the policy is not accepted', async () => {
     const s = svc({});
-    const dto = { address, shippingMethod: 'standard', paymentMethod: 'card', acceptPolicy: false } as CheckoutDto;
+    const dto = {
+      address,
+      shippingMethod: 'standard',
+      paymentMethod: 'card',
+      acceptPolicy: false,
+    } as CheckoutDto;
     await expect(s.checkout('u', dto)).rejects.toBeInstanceOf(BadRequestException);
   });
 
@@ -22,7 +27,12 @@ describe('CheckoutService', () => {
       customer: { findUnique: jest.fn().mockResolvedValue({ id: 'c1' }) },
       cart: { findUnique: jest.fn().mockResolvedValue({ id: 'cart1', items: [] }) },
     };
-    const dto = { address, shippingMethod: 'standard', paymentMethod: 'card', acceptPolicy: true } as CheckoutDto;
+    const dto = {
+      address,
+      shippingMethod: 'standard',
+      paymentMethod: 'card',
+      acceptPolicy: true,
+    } as CheckoutDto;
     await expect(svc(prisma as unknown as PrismaService).checkout('u', dto)).rejects.toBeInstanceOf(
       BadRequestException,
     );
@@ -34,7 +44,15 @@ describe('CheckoutService', () => {
       cart: {
         findUnique: jest.fn().mockResolvedValue({
           id: 'cart1',
-          items: [{ variantId: null, unitPrice: '4500', quantity: 1, currency: 'PKR', product: { title: 'Kurta' } }],
+          items: [
+            {
+              variantId: null,
+              unitPrice: '4500',
+              quantity: 1,
+              currency: 'PKR',
+              product: { title: 'Kurta' },
+            },
+          ],
         }),
       },
     };

@@ -90,7 +90,9 @@ export default function CartPage() {
                 ))}
               </ul>
               <div className="mt-6 flex items-center justify-between border-t border-line pt-4">
-                <span className="font-mono text-sm text-muted">Subtotal ({cart.itemCount} items)</span>
+                <span className="font-mono text-sm text-muted">
+                  Subtotal ({cart.itemCount} items)
+                </span>
                 <span className="font-mono text-lg text-brass">
                   {cart.currency} {Number(cart.subtotal).toLocaleString()}
                 </span>

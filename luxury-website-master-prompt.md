@@ -27,6 +27,7 @@ Build a cinematic, scroll-driven storytelling website for **[BRAND NAME]**, a [l
 **Palette:** Deep noir (#0A0A0A), champagne gold (#C9A96E), ivory (#F5F1E8), one accent of maison red (#9B1B30). No gradients that look "techy" — everything must feel like printed luxury editorial.
 
 **Typography:**
+
 - Display: a high-contrast serif (Playfair Display / Cormorant Garamond / Canela-style) — huge, tightly tracked, used like magazine covers
 - Body: a refined sans (Neue Haas style — use Inter with tight tracking) in small sizes with generous line-height
 - Letter-spaced uppercase micro-labels (11px, 0.2em tracking) for section eyebrows

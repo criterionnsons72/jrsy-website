@@ -24,7 +24,10 @@ export class ConfigSchemaAdminService {
   async create(name: string, definition: unknown) {
     const result = validateConfigDefinition(definition);
     if (!result.ok) {
-      throw new BadRequestException({ message: 'Invalid schema definition', errors: result.errors });
+      throw new BadRequestException({
+        message: 'Invalid schema definition',
+        errors: result.errors,
+      });
     }
     return this.prisma.configSchema.create({
       data: { name, version: 1, definition: result.value as Prisma.InputJsonValue },
@@ -39,7 +42,10 @@ export class ConfigSchemaAdminService {
     const current = await this.get(id);
     const result = validateConfigDefinition(definition);
     if (!result.ok) {
-      throw new BadRequestException({ message: 'Invalid schema definition', errors: result.errors });
+      throw new BadRequestException({
+        message: 'Invalid schema definition',
+        errors: result.errors,
+      });
     }
     const latest = await this.prisma.configSchema.findFirst({
       where: { name: current.name },

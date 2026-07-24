@@ -118,7 +118,9 @@ export default function TryOnPage() {
           Mock provider
         </span>
       </div>
-      <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-ink">Try your style</h1>
+      <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-ink">
+        Try your style
+      </h1>
 
       <div className="mt-6 rounded-lg border border-line bg-surface p-5">
         <label className="block">

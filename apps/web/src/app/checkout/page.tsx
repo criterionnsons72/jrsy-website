@@ -24,7 +24,13 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [cart, setCart] = useState<Cart | null>(null);
   const [status, setStatus] = useState<'loading' | 'ready' | 'auth' | 'empty'>('loading');
-  const [address, setAddress] = useState({ fullName: '', phone: '', line: '', city: '', postalCode: '' });
+  const [address, setAddress] = useState({
+    fullName: '',
+    phone: '',
+    line: '',
+    city: '',
+    postalCode: '',
+  });
   const [shippingMethod, setShippingMethod] = useState<'standard' | 'express'>('standard');
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'cod'>('card');
   const [acceptPolicy, setAcceptPolicy] = useState(false);
@@ -62,12 +68,22 @@ export default function CheckoutPage() {
     const res = await fetch('/api/v1/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
-      body: JSON.stringify({ address, shippingMethod, paymentMethod, acceptPolicy, measurementApproved }),
+      body: JSON.stringify({
+        address,
+        shippingMethod,
+        paymentMethod,
+        acceptPolicy,
+        measurementApproved,
+      }),
     });
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
-      setError(Array.isArray(data?.message) ? data.message.join(' ') : data?.message ?? 'Checkout failed.');
+      setError(
+        Array.isArray(data?.message)
+          ? data.message.join(' ')
+          : (data?.message ?? 'Checkout failed.'),
+      );
       return;
     }
     router.push(`/account/orders/${data.orderId}?placed=1`);
@@ -128,7 +144,11 @@ export default function CheckoutPage() {
           <Section title="2 · Shipping">
             {(['standard', 'express'] as const).map((m) => (
               <label key={m} className="flex items-center gap-2 py-1 text-sm">
-                <input type="radio" checked={shippingMethod === m} onChange={() => setShippingMethod(m)} />
+                <input
+                  type="radio"
+                  checked={shippingMethod === m}
+                  onChange={() => setShippingMethod(m)}
+                />
                 <span className="capitalize">{m}</span>
                 <span className="font-mono text-xs text-muted">PKR {SHIP[m]}</span>
               </label>
@@ -138,7 +158,11 @@ export default function CheckoutPage() {
           <Section title="3 · Payment">
             {(['card', 'cod'] as const).map((m) => (
               <label key={m} className="flex items-center gap-2 py-1 text-sm">
-                <input type="radio" checked={paymentMethod === m} onChange={() => setPaymentMethod(m)} />
+                <input
+                  type="radio"
+                  checked={paymentMethod === m}
+                  onChange={() => setPaymentMethod(m)}
+                />
                 {m === 'card' ? 'Card (mock)' : 'Cash on delivery'}
               </label>
             ))}

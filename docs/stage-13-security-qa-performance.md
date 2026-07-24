@@ -10,9 +10,11 @@
 ---
 
 ## 1. Objective
+
 Consolidate testing across all dimensions and apply hardening before deployment.
 
 ## 2. Hardening applied this stage
+
 - **Global rate limiting** (`@nestjs/throttler`): 100 req/min per IP; **auth `register`/`login` 5/min** (brute-force blunting).
 - **Global exception filter**: consistent error envelope, **no stack traces to clients**, 5xx logged server-side.
 - **e2e tests** (supertest): register → `/auth/me`, validation rejection, unauthenticated block, public health.
@@ -23,17 +25,17 @@ Consolidate testing across all dimensions and apply hardening before deployment.
 
 **Automated (~35 unit + e2e), all in CI (`lint → typecheck → test → build`):**
 
-| Area | Tests |
-|---|---|
+| Area                        | Tests                                                            |
+| --------------------------- | ---------------------------------------------------------------- |
 | Rules engine (configurator) | incompatibility, approval+lead-time, numeric min/max & surcharge |
-| Pricing engine | base+options, urgent surcharge, tax+shipping, immutable snapshot |
-| Measurement formula | ease/fit/stretch/shrinkage, garment vs final |
-| Measurement validation | ranges, ratio outliers, dual-entry, confidence, source penalty |
-| Try-on quality check | portrait/full-body pass; small/landscape/missing fail |
-| Order-flow state machine | linear path, skip rejection, QC pass/fail, terminal states |
-| Health | DB up / DB down |
-| Order guards | empty-cart reject, non-customer block |
-| Auth (e2e) | register→me, validation, 401 without token, public health |
+| Pricing engine              | base+options, urgent surcharge, tax+shipping, immutable snapshot |
+| Measurement formula         | ease/fit/stretch/shrinkage, garment vs final                     |
+| Measurement validation      | ranges, ratio outliers, dual-entry, confidence, source penalty   |
+| Try-on quality check        | portrait/full-body pass; small/landscape/missing fail            |
+| Order-flow state machine    | linear path, skip rejection, QC pass/fail, terminal states       |
+| Health                      | DB up / DB down                                                  |
+| Order guards                | empty-cart reject, non-customer block                            |
+| Auth (e2e)                  | register→me, validation, 401 without token, public health        |
 
 The pure domain engines (pricing, formula, validation, rules, state-machine) are deterministic and I/O-free — the highest-risk logic is the best covered.
 
@@ -51,6 +53,7 @@ The pure domain engines (pricing, formula, validation, rules, state-machine) are
 - **Backup** — `scripts/backup.sh` + managed PITR (Stage 5); validate a restore drill.
 
 ## 5. Known gaps (honest)
+
 - Real object-storage upload, malware scan, and BullMQ workers land with infra (flagged in code).
 - Full install/build/tests run in **CI**, not in this ephemeral authoring environment.
 - Legal/consent copy is placeholder — **lawyer review required**.
@@ -61,16 +64,20 @@ The pure domain engines (pricing, formula, validation, rules, state-machine) are
 ## Completion Report — Stage 13
 
 **Completed**
+
 - Rate limiting, global exception filter, e2e tests, a11y (skip link/focus), SECURITY.md, backup script, and this QA report. Pushed.
 
 **Pending**
+
 - Approval for Stage 14 (Deployment).
 - Staging run of Lighthouse / axe / load / pen tests (needs a deployed environment).
 
 **Risks**
+
 - Some hardening (malware scan, workers, presigned uploads) is infra-dependent — sequenced into deployment.
 
 **Decisions required**
+
 1. Approve the QA posture + hardening.
 2. Approve running load/pen/a11y suites against staging in Stage 14.
 

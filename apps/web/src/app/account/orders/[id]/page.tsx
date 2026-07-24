@@ -74,7 +74,9 @@ export default function OrderDetailPage({ params }: { params: { id: string } }) 
       <Link href="/account/orders" className="font-mono text-xs text-muted hover:text-ink">
         ← All orders
       </Link>
-      <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-ink">{order.number}</h1>
+      <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-ink">
+        {order.number}
+      </h1>
       <p className="mt-1 font-mono text-sm text-muted">{order.status.replace(/_/g, ' ')}</p>
 
       <ul className="mt-6 flex flex-col gap-2">
