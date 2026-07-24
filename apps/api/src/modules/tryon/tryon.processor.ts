@@ -23,7 +23,9 @@ export class TryOnProcessor extends WorkerHost {
   @OnWorkerEvent('failed')
   async onFailed(job: Job<{ jobId: string }>, err: Error): Promise<void> {
     const maxed = job.attemptsMade >= (job.opts.attempts ?? 1);
-    this.logger.warn(`Try-on job ${job.data.jobId} attempt ${job.attemptsMade} failed: ${err.message}`);
+    this.logger.warn(
+      `Try-on job ${job.data.jobId} attempt ${job.attemptsMade} failed: ${err.message}`,
+    );
     if (maxed) {
       await this.tryon.markFailed(job.data.jobId, err.message);
     }

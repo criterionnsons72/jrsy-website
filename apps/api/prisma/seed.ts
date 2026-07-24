@@ -43,9 +43,27 @@ async function main(): Promise<void> {
 
   // Fabrics
   const fabrics = [
-    { name: 'Cotton', stretch: 'non_stretch' as const, weightGsm: 140, pricePerUnit: 0, colorHex: '#EDE7D9' },
-    { name: 'Linen', stretch: 'non_stretch' as const, weightGsm: 170, pricePerUnit: 600, colorHex: '#D9C7A3' },
-    { name: 'Wash & Wear', stretch: 'stretch' as const, weightGsm: 120, pricePerUnit: 300, colorHex: '#C9D3E0' },
+    {
+      name: 'Cotton',
+      stretch: 'non_stretch' as const,
+      weightGsm: 140,
+      pricePerUnit: 0,
+      colorHex: '#EDE7D9',
+    },
+    {
+      name: 'Linen',
+      stretch: 'non_stretch' as const,
+      weightGsm: 170,
+      pricePerUnit: 600,
+      colorHex: '#D9C7A3',
+    },
+    {
+      name: 'Wash & Wear',
+      stretch: 'stretch' as const,
+      weightGsm: 120,
+      pricePerUnit: 300,
+      colorHex: '#C9D3E0',
+    },
   ];
   const fabricRecords = [];
   for (const f of fabrics) {
@@ -150,7 +168,10 @@ async function main(): Promise<void> {
       {
         id: 'no-slim-on-relaxed-fabric',
         description: 'Slim fit needs approval on Wash & Wear',
-        when: [{ group: 'fabric', equals: 'wash_wear' }, { group: 'fit', equals: 'slim' }],
+        when: [
+          { group: 'fabric', equals: 'wash_wear' },
+          { group: 'fit', equals: 'slim' },
+        ],
         then: [{ action: 'requireApproval' }],
       },
     ],

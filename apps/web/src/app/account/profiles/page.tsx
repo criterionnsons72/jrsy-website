@@ -33,7 +33,9 @@ export default function ProfilesPage() {
     const t = token();
     if (!t) return setStatus('auth');
     try {
-      const res = await fetch('/api/v1/body-profiles', { headers: { Authorization: `Bearer ${t}` } });
+      const res = await fetch('/api/v1/body-profiles', {
+        headers: { Authorization: `Bearer ${t}` },
+      });
       if (!res.ok) throw new Error();
       setProfiles(await res.json());
       setStatus('ready');
@@ -201,7 +203,10 @@ export default function ProfilesPage() {
                       {Object.keys(result.outlierFlags).length > 0 && (
                         <span className="text-warn">
                           {' '}
-                          · outliers: {Object.entries(result.outlierFlags).map(([k, v]) => `${k}:${v}`).join(', ')}
+                          · outliers:{' '}
+                          {Object.entries(result.outlierFlags)
+                            .map(([k, v]) => `${k}:${v}`)
+                            .join(', ')}
                         </span>
                       )}
                     </div>

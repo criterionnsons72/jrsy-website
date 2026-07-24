@@ -29,7 +29,9 @@ export interface Paginated<T> {
 export interface ProductDetail extends ProductListItem {
   description: string | null;
   variants: { id: string; sku: string; sizeLabel: string | null; priceDelta: string }[];
-  fabrics: { fabric: { id: string; name: string; pricePerUnit: string; colorHex: string | null } }[];
+  fabrics: {
+    fabric: { id: string; name: string; pricePerUnit: string; colorHex: string | null };
+  }[];
 }
 
 export interface Category {

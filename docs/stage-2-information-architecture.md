@@ -30,6 +30,7 @@ Categories: Kurta/Qameez, Shalwar/Trouser, Abaya, Formal Shirt · Both ready-siz
 ## 4. Sitemap
 
 ### Zone A — Guest (public)
+
 ```
 Home
  ├─ Featured · Categories · How it works
@@ -46,6 +47,7 @@ Auth — Login / Register / Reset
 ```
 
 ### Zone B — Customer (authenticated)
+
 ```
 Dashboard  (orders · profiles · reorder)
 Body Profiles                        [multiple per account]
@@ -67,6 +69,7 @@ Account settings · Addresses
 ```
 
 ### Zone C — Staff / Admin (role-gated console)
+
 ```
 Admin Dashboard (KPIs)
 Catalog        → Products · Fabrics · Colors · Variants · Assets
@@ -89,6 +92,7 @@ Privacy / Data-Deletion Requests
 ## 5. Customer journeys
 
 ### 5.1 Core — Made-to-Measure order (the spine)
+
 ```
 01 Browse & open PDP
 02 Configure garment (fabric · collar · cuff · sleeve · length)
@@ -102,34 +106,39 @@ Privacy / Data-Deletion Requests
 10 Production (pattern → cut → stitch → QC)
 11 Dispatch → Delivered → (reorder later)
 ```
+
 **Rule:** the AI Preview (step 05) is optional and visual. It **never** unlocks production; only tailor validation + lock (08–09) does.
 
 ### 5.2 Ready-size purchase (fastest, no workshop lock)
+
 `PDP → Size questionnaire (FIT) → Recommendation + confidence → Cart → Order`
 
 ### 5.3 Virtual Try-On (mock provider first)
+
 `Upload/capture → Consent → Quality check → Background job → Notify → Style Preview → Add to cart / Delete assets`
 
 ### 5.4 Reorder a successful fit (loyalty loop)
+
 `Orders → Pick past fit → Confirm profile → Checkout`
 
 ### 5.5 Return / Remake (graded by cause)
+
 `Order → Request → Cause (production error / customer measurement / preference) → Approve → Remake or Refund`
 
 ---
 
 ## 6. Staff role journeys (primary loop each)
 
-| Role | Loop |
-|---|---|
-| Tailor / Measurement Reviewer | Review queue → Open order → Check outliers → Approve/Reject → Lock |
-| Workshop Operator | My tasks → Scan QR → Update stage → Notes/photos → Next |
-| Quality Control Officer | QC queue → Checklist → Re-measure finished garment → Pass/Fail |
-| Production Manager | Queue overview → Set priority → Assign operator → Watch delay alerts |
-| Catalog Manager | Products/Fabrics/Schemas/Rules management |
-| Finance | Payments · Refunds · Pricing config · Reports |
-| Customer Support | Read orders/customers · assist · limited edits |
-| Administrator / Super Admin | Broad management; Super Admin also security & data-deletion approval |
+| Role                          | Loop                                                                 |
+| ----------------------------- | -------------------------------------------------------------------- |
+| Tailor / Measurement Reviewer | Review queue → Open order → Check outliers → Approve/Reject → Lock   |
+| Workshop Operator             | My tasks → Scan QR → Update stage → Notes/photos → Next              |
+| Quality Control Officer       | QC queue → Checklist → Re-measure finished garment → Pass/Fail       |
+| Production Manager            | Queue overview → Set priority → Assign operator → Watch delay alerts |
+| Catalog Manager               | Products/Fabrics/Schemas/Rules management                            |
+| Finance                       | Payments · Refunds · Pricing config · Reports                        |
+| Customer Support              | Read orders/customers · assist · limited edits                       |
+| Administrator / Super Admin   | Broad management; Super Admin also security & data-deletion approval |
 
 ---
 
@@ -138,6 +147,7 @@ Privacy / Data-Deletion Requests
 **Customer (mobile-first):** bottom nav — `Home · Catalog · Search · Cart · Account`. Configurator uses a step wizard with a progress bar and Save-and-Continue-Later. Desktop promotes the same items to a top bar.
 
 **Staff console:** grouped left sidebar —
+
 - **Sell:** Orders · Catalog/Fabrics · Pricing & Rules
 - **Make:** Measurement Review · Workshop Queue · QC/Documents
 - **Manage:** Customers/Try-On jobs · Reports/Analytics · Roles/Audit/Privacy
@@ -166,18 +176,22 @@ Changing a body profile later **never** alters a past order.
 ## Completion Report — Stage 2
 
 **Completed**
+
 - Sitemap (Guest / Customer / Staff), customer journeys (5), role journeys (8 roles), navigation model (mobile + console, RTL-ready), module & data-flow with snapshot definition.
 - Interactive visual IA mockup published; this document saved to `docs/stage-2-information-architecture.md`.
 
 **Pending**
+
 - Your approval to proceed to Stage 3 (UX Wireframes).
 - Any structural corrections (e.g. add/remove a top-level section, rename zones).
 
 **Risks**
+
 - Scope creep in the staff console — mitigated by MVP gating (only MVP modules built first).
 - Journey 5.3 (Try-On) depends on consent + secure-delete correctness — carried as a design constraint into wireframes.
 
 **Decisions required**
+
 1. Approve the sitemap's 3-zone split and top-level pages.
 2. Confirm the bottom-nav 5 items (Home/Catalog/Search/Cart/Account) for the customer app.
 3. Confirm the staff console grouping (Sell / Make / Manage).

@@ -79,8 +79,7 @@ export class RulesEngineService {
             errors.push(`${group.label} must be at most ${group.max}${group.unit ?? ''}.`);
           }
           if (group.pricePerUnitOver && num > group.pricePerUnitOver.threshold) {
-            const extra =
-              (num - group.pricePerUnitOver.threshold) * group.pricePerUnitOver.amount;
+            const extra = (num - group.pricePerUnitOver.threshold) * group.pricePerUnitOver.amount;
             priceLines.push({ key: group.key, label: `Extra ${group.label}`, amount: extra });
           }
         }

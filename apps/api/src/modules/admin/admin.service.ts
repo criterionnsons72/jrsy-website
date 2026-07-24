@@ -23,9 +23,14 @@ export class AdminService {
 
     const inProduction = ordersByStatus
       .filter((o) =>
-        ['pattern_preparation', 'fabric_allocation', 'cutting', 'stitching', 'quality_control', 'packing'].includes(
-          o.status,
-        ),
+        [
+          'pattern_preparation',
+          'fabric_allocation',
+          'cutting',
+          'stitching',
+          'quality_control',
+          'packing',
+        ].includes(o.status),
       )
       .reduce((n, o) => n + o._count, 0);
 
@@ -109,7 +114,12 @@ export class AdminService {
     return this.prisma.coupon.findMany({ orderBy: { createdAt: 'desc' } });
   }
 
-  createCoupon(data: { code: string; kind: 'percent' | 'fixed'; value: number; expiresAt?: string }) {
+  createCoupon(data: {
+    code: string;
+    kind: 'percent' | 'fixed';
+    value: number;
+    expiresAt?: string;
+  }) {
     return this.prisma.coupon.create({
       data: {
         code: data.code,

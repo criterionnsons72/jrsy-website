@@ -27,14 +27,23 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <div className="aspect-[4/5] overflow-hidden rounded-lg bg-surface-2">
             {img && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={img.url} alt={img.alt ?? product.title} className="h-full w-full object-cover" />
+              <img
+                src={img.url}
+                alt={img.alt ?? product.title}
+                className="h-full w-full object-cover"
+              />
             )}
           </div>
           {product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
               {product.images.map((im, i) => (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img key={i} src={im.url} alt="" className="aspect-square w-full rounded object-cover" />
+                <img
+                  key={i}
+                  src={im.url}
+                  alt=""
+                  className="aspect-square w-full rounded object-cover"
+                />
               ))}
             </div>
           )}

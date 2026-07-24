@@ -95,7 +95,7 @@ export function AuthForm({ mode }: { mode: 'login' | 'register' }) {
       </form>
 
       <p className="mt-6 text-sm text-muted">
-        {isRegister ? 'Already have an account? ' : "New here? "}
+        {isRegister ? 'Already have an account? ' : 'New here? '}
         <Link href={isRegister ? '/login' : '/register'} className="text-brand underline">
           {isRegister ? 'Sign in' : 'Create an account'}
         </Link>

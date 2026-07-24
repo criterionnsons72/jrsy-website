@@ -2,7 +2,7 @@
 
 A mobile-first, RTL-ready Progressive Web App for **made-to-measure & customizable clothing**, with virtual try-on (style preview), custom measurements, dynamic pricing, and a workshop → manufacturing workflow.
 
-> **Core principle:** *Style Preview*, *Fit Recommendation*, and *Made-to-Measure Validation* are three separate promises. AI try-on shows look only — never a guaranteed fit.
+> **Core principle:** _Style Preview_, _Fit Recommendation_, and _Made-to-Measure Validation_ are three separate promises. AI try-on shows look only — never a guaranteed fit.
 
 This repository is built in stages. See [`docs/`](./docs) for the full design record (Stages 1–5). Stage 6 (this) sets up the project foundation.
 
@@ -10,14 +10,14 @@ This repository is built in stages. See [`docs/`](./docs) for the full design re
 
 ## Tech stack
 
-| Layer | Choice |
-|---|---|
+| Layer                             | Choice                                                         |
+| --------------------------------- | -------------------------------------------------------------- |
 | Web (customer / admin / workshop) | Next.js (App Router) · React · TypeScript · Tailwind CSS · PWA |
-| API | NestJS (modular monolith) · REST · OpenAPI |
-| Data | PostgreSQL · Prisma ORM |
-| Cache / queues | Redis · BullMQ |
-| Object storage | S3-compatible (MinIO in dev) |
-| Tooling | npm workspaces · ESLint · Prettier · Docker · GitHub Actions |
+| API                               | NestJS (modular monolith) · REST · OpenAPI                     |
+| Data                              | PostgreSQL · Prisma ORM                                        |
+| Cache / queues                    | Redis · BullMQ                                                 |
+| Object storage                    | S3-compatible (MinIO in dev)                                   |
+| Tooling                           | npm workspaces · ESLint · Prettier · Docker · GitHub Actions   |
 
 ## Monorepo layout
 
@@ -64,14 +64,14 @@ npm run dev -w apps/web   # http://localhost:3000
 
 ## Scripts (root)
 
-| Script | Does |
-|---|---|
-| `npm run dev` | Run web + api in parallel |
-| `npm run build` | Build all workspaces |
-| `npm run lint` | Lint all workspaces |
+| Script              | Does                      |
+| ------------------- | ------------------------- |
+| `npm run dev`       | Run web + api in parallel |
+| `npm run build`     | Build all workspaces      |
+| `npm run lint`      | Lint all workspaces       |
 | `npm run typecheck` | Type-check all workspaces |
-| `npm run test` | Run tests |
-| `npm run format` | Prettier write |
+| `npm run test`      | Run tests                 |
+| `npm run format`    | Prettier write            |
 
 ## Health check
 

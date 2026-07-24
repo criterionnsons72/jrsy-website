@@ -75,13 +75,21 @@ export class DocumentsService {
       finalMeasurements: Record<string, number> | null;
     },
   ): Record<string, unknown> {
-    const header = { document: type, order: ctx.orderNumber, generatedAt: new Date().toISOString() };
+    const header = {
+      document: type,
+      order: ctx.orderNumber,
+      generatedAt: new Date().toISOString(),
+    };
 
     switch (type) {
       case 'tech_pack':
         return {
           ...header,
-          items: ctx.items.map((i) => ({ title: i.title, quantity: i.quantity, options: i.config ?? {} })),
+          items: ctx.items.map((i) => ({
+            title: i.title,
+            quantity: i.quantity,
+            options: i.config ?? {},
+          })),
         };
       case 'measurement_sheet':
         return {

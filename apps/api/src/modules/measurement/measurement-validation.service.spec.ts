@@ -4,11 +4,11 @@ describe('MeasurementValidationService', () => {
   const svc = new MeasurementValidationService();
 
   it('accepts a plausible measurement with matching dual entry', () => {
-    const r = svc.validate(
-      { chest: 100, waist: 88, hip: 102 },
-      'manual',
-      { chest: 100, waist: 88, hip: 102 },
-    );
+    const r = svc.validate({ chest: 100, waist: 88, hip: 102 }, 'manual', {
+      chest: 100,
+      waist: 88,
+      hip: 102,
+    });
     expect(r.errors).toHaveLength(0);
     expect(Object.keys(r.outlierFlags)).toHaveLength(0);
     expect(r.confidence).toBe(90); // -10 for manual source

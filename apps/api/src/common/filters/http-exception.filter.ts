@@ -27,7 +27,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let message: unknown = 'Internal server error';
     if (isHttp) {
       const body = exception.getResponse();
-      message = typeof body === 'string' ? body : (body as { message?: unknown }).message ?? body;
+      message = typeof body === 'string' ? body : ((body as { message?: unknown }).message ?? body);
     }
 
     if (status >= 500) {

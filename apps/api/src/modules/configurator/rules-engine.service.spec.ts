@@ -31,7 +31,13 @@ const schema: ConfigSchemaDefinition = {
       type: 'select',
       choices: [
         { id: 'none', label: 'None' },
-        { id: 'full', label: 'Full front', priceDelta: 2500, leadTimeDays: 4, requiresApproval: true },
+        {
+          id: 'full',
+          label: 'Full front',
+          priceDelta: 2500,
+          leadTimeDays: 4,
+          requiresApproval: true,
+        },
       ],
     },
     {

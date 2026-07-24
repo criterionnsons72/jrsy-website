@@ -8,7 +8,11 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BodyProfileService } from './body-profile.service';
 import { MeasurementValidationService } from './measurement-validation.service';
-import { MeasurementFormulaService, type FitPreference, type FabricStretch } from './measurement-formula.service';
+import {
+  MeasurementFormulaService,
+  type FitPreference,
+  type FabricStretch,
+} from './measurement-formula.service';
 import { AddMeasurementDto } from './dto/add-measurement.dto';
 
 @Injectable()
@@ -25,7 +29,10 @@ export class MeasurementService {
 
     const result = this.validation.validate(dto.values, dto.source, dto.confirmValues);
     if (result.errors.length > 0) {
-      throw new BadRequestException({ message: 'Measurement validation failed', errors: result.errors });
+      throw new BadRequestException({
+        message: 'Measurement validation failed',
+        errors: result.errors,
+      });
     }
 
     const measurement = await this.prisma.measurement.create({

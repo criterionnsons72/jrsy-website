@@ -49,10 +49,7 @@ export class ProductionService {
           },
         });
       } else if (order.task) {
-        const history = [
-          ...((order.task.statusHistory as unknown as HistoryEntry[]) ?? []),
-          entry,
-        ];
+        const history = [...((order.task.statusHistory as unknown as HistoryEntry[]) ?? []), entry];
         await tx.productionTask.update({
           where: { orderId },
           data: { stage: to, statusHistory: history as unknown as Prisma.InputJsonValue },
@@ -60,7 +57,13 @@ export class ProductionService {
       }
 
       await tx.auditLog.create({
-        data: { actorId, action: 'order.advance', entity: 'Order', entityId: orderId, after: { to } },
+        data: {
+          actorId,
+          action: 'order.advance',
+          entity: 'Order',
+          entityId: orderId,
+          after: { to },
+        },
       });
 
       return { id: updated.id, status: updated.status };
@@ -127,7 +130,8 @@ export class ProductionService {
       data: {
         qcPassed: input.pass,
         qcNotes: input.notes ?? null,
-        finalMeasurements: (input.finalMeasurements ?? undefined) as Prisma.InputJsonValue | undefined,
+        finalMeasurements: (input.finalMeasurements ?? undefined) as
+          Prisma.InputJsonValue | undefined,
       },
     });
 
