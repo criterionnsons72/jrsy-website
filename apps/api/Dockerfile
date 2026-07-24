@@ -24,6 +24,6 @@ COPY --from=build /app/apps/api/prisma ./apps/api/prisma
 COPY --from=build /app/apps/api/package.json ./apps/api/package.json
 USER app
 EXPOSE 3001
-# Migrations are applied by a separate release step:
-#   npm run db:migrate:deploy -w apps/api
-CMD ["node", "apps/api/dist/main.js"]
+# Apply pending migrations, then start. (Single-instance friendly; for multi-
+# instance, move migrate to a dedicated release step.)
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma && node apps/api/dist/main.js"]
