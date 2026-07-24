@@ -11,6 +11,7 @@ import { ConfiguratorModule } from './modules/configurator/configurator.module';
 import { PricingModule } from './modules/pricing/pricing.module';
 import { MeasurementModule } from './modules/measurement/measurement.module';
 import { TryOnModule } from './modules/tryon/tryon.module';
+import { ProductionModule } from './modules/production/production.module';
 
 @Module({
   imports: [
@@ -32,7 +33,9 @@ import { TryOnModule } from './modules/tryon/tryon.module';
     MeasurementModule,
     // Stage 10 — Virtual Try-On (mock provider):
     TryOnModule,
-    // Stage 11+ modules (checkout, production, documents…) go here.
+    // Stage 11 — Order & Production:
+    ProductionModule,
+    // Stage 12+ modules (admin/reporting…) go here.
   ],
 })
 export class AppModule {}

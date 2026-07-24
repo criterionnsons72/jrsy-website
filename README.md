@@ -89,8 +89,9 @@ All secrets go through `.env` files (never committed). See `.env.example` files 
 - [x] Stage 7 — Ecommerce Core: catalog, PDP, cart, order shell (see `docs/stage-7`)
 - [x] Stage 8 — Customization Engine: configurator, rules engine, dynamic pricing (see `docs/stage-8`)
 - [x] Stage 9 — Measurement & Sizing: body profiles, formula, validation, tailor review + lock (see `docs/stage-9`)
-- [x] **Stage 10 — Virtual Try-On Adapter**: provider-agnostic, mock first, consent, secure delete (see `docs/stage-10`)
-- [ ] Stage 11 — Order & Production
+- [x] Stage 10 — Virtual Try-On Adapter: provider-agnostic, mock first, consent, secure delete (see `docs/stage-10`)
+- [x] **Stage 11 — Order & Production**: state machine, workshop dashboard, documents, QC (see `docs/stage-11`)
+- [ ] Stage 12 — Admin & Reporting
 - [ ] … (see `docs/`)
 
 ---

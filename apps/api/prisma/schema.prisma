@@ -316,6 +316,8 @@ model Order {
   // Immutable snapshot of the whole order at placement (expanded in later stages).
   snapshot   Json
   items      OrderItem[]
+  task       ProductionTask?
+  documents  Document[]
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
 
@@ -334,6 +336,42 @@ model OrderItem {
   unitPrice  Decimal @db.Decimal(10, 2)
   lineTotal  Decimal @db.Decimal(10, 2)
   config     Json?
+}
+
+// ---------------- Production & workshop ----------------
+
+model ProductionTask {
+  id               String    @id @default(uuid())
+  orderId          String    @unique
+  order            Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  code             String    @unique // barcode / QR value (= order number)
+  stage            OrderStatus
+  operatorId       String? // assigned workshop operator (user id)
+  priority         Int       @default(0) // higher = more urgent
+  dueAt            DateTime?
+  notes            String?
+  attachments      Json? // array of asset refs
+  statusHistory    Json // append-only [{ stage, at, byId }]
+  qcPassed         Boolean?
+  qcNotes          String?
+  finalMeasurements Json? // measured on the finished garment
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([stage])
+  @@index([operatorId])
+}
+
+model Document {
+  id        String       @id @default(uuid())
+  orderId   String
+  order     Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      DocumentType
+  content   Json // structured content (rendered to PDF by a worker)
+  assetRef  String? // stored PDF/CSV once rendered
+  createdAt DateTime     @default(now())
+
+  @@unique([orderId, type])
 }
 
 // ---------------- Privacy / audit (foundation) ----------------
@@ -410,6 +448,17 @@ enum TryOnStatus {
   ready
   failed
   deleted
+}
+
+enum DocumentType {
+  measurement_sheet
+  tech_pack
+  bom
+  fabric_consumption
+  cutting
+  stitching
+  qc
+  packing
 }
 
 enum FabricStretch {
