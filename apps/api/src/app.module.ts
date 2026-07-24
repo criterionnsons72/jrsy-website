@@ -15,6 +15,7 @@ import { MeasurementModule } from './modules/measurement/measurement.module';
 import { TryOnModule } from './modules/tryon/tryon.module';
 import { ProductionModule } from './modules/production/production.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { CheckoutModule } from './modules/checkout/checkout.module';
 
 @Module({
   imports: [
@@ -42,6 +43,8 @@ import { AdminModule } from './modules/admin/admin.module';
     ProductionModule,
     // Stage 12 — Admin & Reporting:
     AdminModule,
+    // Checkout & payment (adapter, mock first):
+    CheckoutModule,
     // Stage 13+ (security/QA/perf, deployment) follow.
   ],
   providers: [

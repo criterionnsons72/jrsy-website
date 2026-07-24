@@ -95,10 +95,12 @@ export default function CartPage() {
                   {cart.currency} {Number(cart.subtotal).toLocaleString()}
                 </span>
               </div>
-              <p className="mt-4 font-mono text-xs text-faint">
-                Checkout (address, shipping, tax, measurement approval, policy) arrives in a later
-                stage.
-              </p>
+              <Link
+                href="/checkout"
+                className="mt-5 block rounded-sm bg-brand px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-brand-strong"
+              >
+                Proceed to checkout →
+              </Link>
             </>
           )}
         </div>
