@@ -10,6 +10,10 @@
 export interface TryOnInput {
   productId?: string;
   inputAssetKey: string; // object-storage key of the uploaded image
+  // Short-lived URLs a real provider fetches (the person photo + the garment).
+  humanImageUrl?: string;
+  garmentImageUrl?: string;
+  garmentDescription?: string;
   // Lightweight metadata used for the quality check (no image bytes here).
   imageMeta?: { width?: number; height?: number; hasFullBody?: boolean };
 }
@@ -22,7 +26,8 @@ export interface ProviderJobRef {
 
 export interface TryOnProviderResult {
   status: ProviderJobStatus;
-  resultAssetKey?: string;
+  resultAssetKey?: string; // already in our storage (mock)
+  resultUrl?: string; // remote URL (real provider); the service persists it
   costCents: number;
   error?: string;
 }

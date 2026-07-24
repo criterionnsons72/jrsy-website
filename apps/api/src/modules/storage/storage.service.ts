@@ -82,6 +82,29 @@ export class StorageService {
     });
   }
 
+  /** Store raw bytes and return the object key. */
+  async putBuffer(
+    purpose: 'tryon' | 'scan' | 'attachment',
+    body: Buffer,
+    contentType: string,
+  ): Promise<string> {
+    const { client, bucket } = this.ensure();
+    const key = this.buildKey(purpose, contentType);
+    await client.send(
+      new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }),
+    );
+    return key;
+  }
+
+  /** Download a remote image and store it, returning the object key. */
+  async storeFromUrl(purpose: 'tryon' | 'scan' | 'attachment', url: string): Promise<string> {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch result image: ${res.status}`);
+    const contentType = res.headers.get('content-type') ?? 'image/png';
+    const buffer = Buffer.from(await res.arrayBuffer());
+    return this.putBuffer(purpose, buffer, contentType);
+  }
+
   async deleteObject(key: string | null | undefined): Promise<void> {
     if (!key || !this.client || !this.bucket) return;
     try {

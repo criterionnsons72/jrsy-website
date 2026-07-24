@@ -29,6 +29,11 @@ export const envSchema = z.object({
   TRYON_PROVIDER: z.string().default('mock'),
   BODYSCAN_PROVIDER: z.string().default('mock'),
   PAYMENT_PROVIDER: z.string().default('mock'),
+
+  // Replicate (only needed when TRYON_PROVIDER=replicate)
+  REPLICATE_API_TOKEN: z.string().optional(),
+  REPLICATE_TRYON_VERSION: z.string().optional(),
+  REPLICATE_TRYON_MODEL: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

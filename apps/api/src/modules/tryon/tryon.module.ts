@@ -6,6 +6,7 @@ import { TryOnProcessor } from './tryon.processor';
 import { QualityCheckService } from './quality-check.service';
 import { MockTryOnProvider } from './mock/mock-tryon.provider';
 import { MockBodyScanProvider } from './mock/mock-bodyscan.provider';
+import { ReplicateTryOnProvider } from './replicate/replicate-tryon.provider';
 import {
   BODYSCAN_PROVIDER,
   TRYON_PROVIDER,
@@ -32,9 +33,10 @@ import {
       useFactory: (config: ConfigService, mock: MockTryOnProvider): TryOnProvider => {
         const name = config.get<string>('TRYON_PROVIDER', 'mock');
         switch (name) {
+          case 'replicate':
+            // Instantiated lazily so the token is only required when selected.
+            return new ReplicateTryOnProvider(config);
           case 'mock':
-            return mock;
-          // case 'pictofit': return new PictofitProvider(...) — added when approved
           default:
             return mock;
         }

@@ -107,23 +107,43 @@ export class TryOnService {
       data: { status: 'processing', attempts: { increment: 1 } },
     });
 
+    // A real provider fetches the person photo + the garment image by URL.
+    let humanImageUrl: string | undefined;
+    let garmentImageUrl: string | undefined;
+    if (this.storage.configured && job.inputAssetKey) {
+      humanImageUrl = await this.storage.presignView(job.inputAssetKey);
+    }
+    if (job.productId) {
+      const image = await this.prisma.productImage.findFirst({
+        where: { productId: job.productId },
+        orderBy: { sortOrder: 'asc' },
+      });
+      garmentImageUrl = image?.url;
+    }
+
     const ref = await this.tryonProvider.createTryOnJob({
       productId: job.productId ?? undefined,
       inputAssetKey: job.inputAssetKey ?? '',
+      humanImageUrl,
+      garmentImageUrl,
     });
     const result = await this.tryonProvider.getTryOnResult(ref);
-    if (result.status !== 'ready' || !result.resultAssetKey) {
+    if (result.status !== 'ready') {
       throw new Error(result.error ?? 'Provider did not return a result.');
+    }
+
+    // Persist the result into our own storage (a remote URL is downloaded first).
+    let resultAssetKey = result.resultAssetKey;
+    if (!resultAssetKey && result.resultUrl && this.storage.configured) {
+      resultAssetKey = await this.storage.storeFromUrl('tryon', result.resultUrl);
+    }
+    if (!resultAssetKey) {
+      throw new Error('No result image was produced.');
     }
 
     await this.prisma.tryOnJob.update({
       where: { id: jobId },
-      data: {
-        status: 'ready',
-        resultAssetKey: result.resultAssetKey,
-        costCents: result.costCents,
-        error: null,
-      },
+      data: { status: 'ready', resultAssetKey, costCents: result.costCents, error: null },
     });
   }
 
