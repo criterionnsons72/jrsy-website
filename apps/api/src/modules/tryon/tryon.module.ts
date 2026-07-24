@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TryOnController, TryOnAnalyticsController } from './tryon.controller';
 import { TryOnService } from './tryon.service';
+import { TryOnProcessor } from './tryon.processor';
 import { QualityCheckService } from './quality-check.service';
 import { MockTryOnProvider } from './mock/mock-tryon.provider';
 import { MockBodyScanProvider } from './mock/mock-bodyscan.provider';
@@ -21,6 +22,7 @@ import {
   controllers: [TryOnController, TryOnAnalyticsController],
   providers: [
     TryOnService,
+    TryOnProcessor,
     QualityCheckService,
     MockTryOnProvider,
     MockBodyScanProvider,

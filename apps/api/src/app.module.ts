@@ -17,6 +17,7 @@ import { ProductionModule } from './modules/production/production.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { CheckoutModule } from './modules/checkout/checkout.module';
 import { StorageModule } from './modules/storage/storage.module';
+import { QueueModule } from './modules/queue/queue.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StorageModule } from './modules/storage/storage.module';
     ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
     StorageModule,
+    QueueModule,
     HealthModule,
     AuthModule,
     // Stage 7 — Ecommerce Core:

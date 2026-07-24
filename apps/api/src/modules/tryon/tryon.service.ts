@@ -6,8 +6,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
+import { QUEUES, DEFAULT_JOB_OPTS } from '../queue/queue.constants';
 import { QualityCheckService, type ImageMeta } from './quality-check.service';
 import {
   BODYSCAN_PROVIDER,
@@ -26,6 +29,7 @@ export class TryOnService {
     private readonly prisma: PrismaService,
     private readonly quality: QualityCheckService,
     private readonly storage: StorageService,
+    @InjectQueue(QUEUES.tryon) private readonly queue: Queue,
     @Inject(TRYON_PROVIDER) private readonly tryonProvider: TryOnProvider,
     @Inject(BODYSCAN_PROVIDER) private readonly scanProvider: BodyScanProvider,
   ) {}
@@ -82,54 +86,69 @@ export class TryOnService {
       },
     });
 
-    // Background processing (a BullMQ worker in production; in-process for the mock).
-    void this.processJob(job.id, input);
+    // Enqueue for a background worker; fall back to inline if Redis is down.
+    try {
+      await this.queue.add('process', { jobId: job.id }, DEFAULT_JOB_OPTS);
+    } catch {
+      this.logger.warn('Queue unavailable — processing try-on inline.');
+      void this.runInline(job.id);
+    }
 
     return { id: job.id, status: job.status, disclaimer: this.disclaimer() };
   }
 
-  private async processJob(
-    jobId: string,
-    input: { productId?: string; inputAssetKey: string; imageMeta?: ImageMeta },
-  ): Promise<void> {
-    try {
-      await this.prisma.tryOnJob.update({
-        where: { id: jobId },
-        data: { status: 'processing', attempts: { increment: 1 } },
-      });
+  /** Core processing step. Throws on failure so the queue can retry it. */
+  async processOnce(jobId: string): Promise<void> {
+    const job = await this.prisma.tryOnJob.findUnique({ where: { id: jobId } });
+    if (!job || job.status === 'deleted') return;
 
-      const ref = await this.tryonProvider.createTryOnJob({
-        productId: input.productId,
-        inputAssetKey: input.inputAssetKey,
-        imageMeta: input.imageMeta,
-      });
-      const result = await this.tryonProvider.getTryOnResult(ref);
+    await this.prisma.tryOnJob.update({
+      where: { id: jobId },
+      data: { status: 'processing', attempts: { increment: 1 } },
+    });
 
-      if (result.status !== 'ready' || !result.resultAssetKey) {
-        throw new Error(result.error ?? 'Provider did not return a result.');
-      }
+    const ref = await this.tryonProvider.createTryOnJob({
+      productId: job.productId ?? undefined,
+      inputAssetKey: job.inputAssetKey ?? '',
+    });
+    const result = await this.tryonProvider.getTryOnResult(ref);
+    if (result.status !== 'ready' || !result.resultAssetKey) {
+      throw new Error(result.error ?? 'Provider did not return a result.');
+    }
 
-      await this.prisma.tryOnJob.update({
-        where: { id: jobId },
-        data: {
-          status: 'ready',
-          resultAssetKey: result.resultAssetKey,
-          costCents: result.costCents,
-          error: null,
-        },
-      });
-    } catch (err) {
-      const job = await this.prisma.tryOnJob.findUnique({ where: { id: jobId } });
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      if (job && job.attempts < MAX_ATTEMPTS) {
-        this.logger.warn(`Try-on job ${jobId} failed (attempt ${job.attempts}), retrying: ${message}`);
-        void this.processJob(jobId, input);
-      } else {
-        this.logger.error(`Try-on job ${jobId} failed permanently: ${message}`);
-        await this.prisma.tryOnJob.update({
-          where: { id: jobId },
-          data: { status: 'failed', error: message },
-        });
+    await this.prisma.tryOnJob.update({
+      where: { id: jobId },
+      data: {
+        status: 'ready',
+        resultAssetKey: result.resultAssetKey,
+        costCents: result.costCents,
+        error: null,
+      },
+    });
+  }
+
+  /** Mark a job permanently failed (called by the worker after its retries). */
+  async markFailed(jobId: string, message: string): Promise<void> {
+    this.logger.error(`Try-on job ${jobId} failed permanently: ${message}`);
+    await this.prisma.tryOnJob.update({
+      where: { id: jobId },
+      data: { status: 'failed', error: message },
+    });
+  }
+
+  /** Fallback when no queue: retry inline up to MAX_ATTEMPTS. */
+  private async runInline(jobId: string): Promise<void> {
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        await this.processOnce(jobId);
+        return;
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Unknown error';
+        if (attempt >= MAX_ATTEMPTS) {
+          await this.markFailed(jobId, message);
+        } else {
+          this.logger.warn(`Inline try-on ${jobId} attempt ${attempt} failed: ${message}`);
+        }
       }
     }
   }
