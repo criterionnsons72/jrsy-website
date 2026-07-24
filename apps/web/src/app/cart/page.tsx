@@ -48,9 +48,11 @@ export default function CartPage() {
 
       {status === 'auth' && (
         <p className="mt-6 text-muted">
-          Please sign in to view your cart. A sign-in screen &amp; checkout arrive in the next stage;
-          the cart API is already live and testable via{' '}
-          <code className="font-mono text-brand">/api/v1/cart</code>.
+          Please{' '}
+          <Link href="/login" className="text-brand underline">
+            sign in
+          </Link>{' '}
+          to view your cart.
         </p>
       )}
       {status === 'loading' && <p className="mt-6 text-muted">Loading…</p>}

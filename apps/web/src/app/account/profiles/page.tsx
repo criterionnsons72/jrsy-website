@@ -90,8 +90,11 @@ export default function ProfilesPage() {
       <div className="mx-auto max-w-3xl px-5 py-12">
         <h1 className="font-serif text-3xl font-semibold text-ink">Body profiles</h1>
         <p className="mt-4 text-muted">
-          Please sign in to manage profiles. The API is live — register &amp; login to get a token
-          (sign-in UI is part of the checkout stage).
+          Please{' '}
+          <a href="/login" className="text-brand underline">
+            sign in
+          </a>{' '}
+          to manage your body profiles.
         </p>
       </div>
     );

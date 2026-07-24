@@ -87,7 +87,13 @@ export default function TryOnPage() {
     return (
       <div className="mx-auto max-w-2xl px-5 py-12">
         <h1 className="font-serif text-3xl font-semibold text-ink">Try your style</h1>
-        <p className="mt-4 text-muted">Please sign in to use the style preview (API is live).</p>
+        <p className="mt-4 text-muted">
+          Please{' '}
+          <a href="/login" className="text-brand underline">
+            sign in
+          </a>{' '}
+          to use the style preview.
+        </p>
       </div>
     );
   }

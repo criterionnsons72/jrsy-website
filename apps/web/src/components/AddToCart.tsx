@@ -53,7 +53,13 @@ export function AddToCart({ productId }: { productId: string }) {
         </p>
       )}
       {state === 'auth' && (
-        <p className="font-mono text-xs text-warn">Please sign in to add items (sign-in UI coming next stage).</p>
+        <p className="font-mono text-xs text-warn">
+          Please{' '}
+          <Link href="/login" className="text-brand underline">
+            sign in
+          </Link>{' '}
+          to add items.
+        </p>
       )}
       {state === 'error' && (
         <p className="font-mono text-xs text-crit">Could not add to cart — please try again.</p>
