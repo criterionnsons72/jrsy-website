@@ -1,6 +1,7 @@
+import Link from 'next/link';
+
 /**
- * Stage 6 landing placeholder — proves the design tokens, theme, and layout
- * are wired end-to-end. Real storefront pages arrive in Stage 7 (Ecommerce Core).
+ * Landing page. Links into the Stage 7 catalog.
  */
 export default function HomePage() {
   return (
@@ -30,9 +31,12 @@ export default function HomePage() {
       </div>
 
       <div className="mt-10 flex flex-wrap gap-3">
-        <button className="rounded-sm bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong">
+        <Link
+          href="/catalog"
+          className="rounded-sm bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong"
+        >
           Browse catalog
-        </button>
+        </Link>
         <a
           href="/api/v1/health"
           className="rounded-sm border border-line-strong px-5 py-3 text-sm text-ink transition hover:bg-surface-2"

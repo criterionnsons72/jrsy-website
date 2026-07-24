@@ -1,7 +1,8 @@
-// Tailor Master — Prisma schema (Stage 6 FOUNDATION).
-// This is the REAL schema that migrates. It starts with identity/auth + customer.
-// Catalog, measurement, order, production, etc. are added in their own stages
-// (7+). The full target model is sketched in docs/prisma-schema-sketch.prisma.
+// Tailor Master — Prisma schema.
+// Stage 6: identity/customer foundation.
+// Stage 7: ecommerce core (catalog, cart, order shell) — this file.
+// Later stages add configurator rules, measurement, tryon, production, etc.
+// Target model sketched in docs/prisma-schema-sketch.prisma.
 
 generator client {
   provider = "prisma-client-js"
@@ -42,7 +43,7 @@ model Role {
 
 model Permission {
   id    String           @id @default(uuid())
-  key   String           @unique // e.g. "order.read", "measurement.lock"
+  key   String           @unique
   roles RolePermission[]
 }
 
@@ -65,15 +66,15 @@ model RolePermission {
 }
 
 model Session {
-  id               String   @id @default(uuid())
+  id               String    @id @default(uuid())
   userId           String
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   refreshTokenHash String
   userAgent        String?
   ip               String?
   expiresAt        DateTime
   revokedAt        DateTime?
-  createdAt        DateTime @default(now())
+  createdAt        DateTime  @default(now())
 
   @@index([userId])
 }
@@ -85,7 +86,145 @@ model Customer {
   userId    String   @unique
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName  String?
+  carts     Cart[]
+  orders    Order[]
   createdAt DateTime @default(now())
+}
+
+// ---------------- Catalog ----------------
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  slug     String    @unique
+  sortOrder Int      @default(0)
+  products Product[]
+}
+
+model Product {
+  id            String          @id @default(uuid())
+  categoryId    String
+  category      Category        @relation(fields: [categoryId], references: [id])
+  title         String
+  slug          String          @unique
+  description   String?
+  basePrice     Decimal         @db.Decimal(10, 2)
+  currency      String          @default("PKR")
+  madeToMeasure Boolean         @default(true)
+  readySize     Boolean         @default(true)
+  isActive      Boolean         @default(true)
+  images        ProductImage[]
+  variants      ProductVariant[]
+  fabrics       ProductFabric[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([categoryId])
+  @@index([isActive])
+}
+
+model ProductImage {
+  id        String  @id @default(uuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+}
+
+model ProductVariant {
+  id         String  @id @default(uuid())
+  productId  String
+  product    Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku        String  @unique
+  sizeLabel  String? // ready size (S–XXL); null => made-to-measure only
+  priceDelta Decimal @default(0) @db.Decimal(10, 2)
+  isActive   Boolean @default(true)
+}
+
+model Fabric {
+  id           String          @id @default(uuid())
+  name         String
+  stretch      FabricStretch   @default(non_stretch)
+  weightGsm    Int?
+  pricePerUnit Decimal         @default(0) @db.Decimal(10, 2)
+  colorHex     String?
+  isActive     Boolean         @default(true)
+  products     ProductFabric[]
+}
+
+model ProductFabric {
+  productId String
+  fabricId  String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  fabric    Fabric  @relation(fields: [fabricId], references: [id], onDelete: Cascade)
+
+  @@id([productId, fabricId])
+}
+
+// ---------------- Cart ----------------
+
+model Cart {
+  id         String     @id @default(uuid())
+  customerId String     @unique
+  customer   Customer   @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  items      CartItem[]
+  updatedAt  DateTime   @updatedAt
+  createdAt  DateTime   @default(now())
+}
+
+model CartItem {
+  id              String   @id @default(uuid())
+  cartId          String
+  cart            Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId       String
+  variantId       String?
+  quantity        Int      @default(1)
+  // Snapshot of the price at add-time so the cart is stable if catalog prices change.
+  unitPrice       Decimal  @db.Decimal(10, 2)
+  currency        String   @default("PKR")
+  // Configuration/measurement references are filled by later stages (configurator, measurement).
+  config          Json?
+  bodyProfileId   String?
+  fitPreference   String?
+  tryOnRef        String?
+  createdAt       DateTime @default(now())
+
+  @@index([cartId])
+}
+
+// ---------------- Order (shell) ----------------
+
+model Order {
+  id         String      @id @default(uuid())
+  number     String      @unique
+  customerId String
+  customer   Customer    @relation(fields: [customerId], references: [id])
+  status     OrderStatus @default(draft)
+  currency   String      @default("PKR")
+  subtotal   Decimal     @db.Decimal(10, 2)
+  total      Decimal     @db.Decimal(10, 2)
+  // Immutable snapshot of the whole order at placement (expanded in later stages).
+  snapshot   Json
+  items      OrderItem[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model OrderItem {
+  id         String  @id @default(uuid())
+  orderId    String
+  order      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId  String
+  variantId  String?
+  title      String // captured at order time
+  quantity   Int     @default(1)
+  unitPrice  Decimal @db.Decimal(10, 2)
+  lineTotal  Decimal @db.Decimal(10, 2)
+  config     Json?
 }
 
 // ---------------- Privacy / audit (foundation) ----------------
@@ -94,7 +233,7 @@ model ConsentRecord {
   id        String    @id @default(uuid())
   userId    String
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  purpose   String // tryon_image | body_scan | marketing
+  purpose   String
   version   String
   ip        String?
   grantedAt DateTime  @default(now())
@@ -130,6 +269,11 @@ enum Unit {
   cm
 }
 
+enum FabricStretch {
+  stretch
+  non_stretch
+}
+
 enum RoleKey {
   guest
   customer
@@ -143,4 +287,21 @@ enum RoleKey {
   finance
   admin
   super_admin
+}
+
+enum OrderStatus {
+  draft
+  measurement_review
+  customer_approval
+  payment_complete
+  measurement_locked
+  pattern_preparation
+  fabric_allocation
+  cutting
+  stitching
+  quality_control
+  packing
+  dispatch
+  delivered
+  cancelled
 }

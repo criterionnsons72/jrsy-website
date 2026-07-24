@@ -85,8 +85,8 @@ All secrets go through `.env` files (never committed). See `.env.example` files 
 ## Status
 
 - [x] Stages 1–5 — Discovery → Technical Architecture (see `docs/`)
-- [x] **Stage 6 — Project Setup** (this): monorepo, env, DB foundation, auth foundation, CI/CD, standards
-- [ ] Stage 7 — Ecommerce Core
+- [x] Stage 6 — Project Setup: monorepo, env, DB foundation, auth foundation, CI/CD, standards
+- [x] **Stage 7 — Ecommerce Core**: catalog, PDP, cart, order shell (see `docs/stage-7`)
 - [ ] Stage 8 — Customization Engine
 - [ ] … (see `docs/`)
 
