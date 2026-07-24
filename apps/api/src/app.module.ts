@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './modules/health/health.module';
@@ -20,6 +22,8 @@ import { AdminModule } from './modules/admin/admin.module';
       isGlobal: true,
       validate: validateEnv,
     }),
+    // Global rate limiting (per IP). Auth routes tighten this further.
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 100 }]),
     PrismaModule,
     HealthModule,
     AuthModule,
@@ -39,6 +43,10 @@ import { AdminModule } from './modules/admin/admin.module';
     // Stage 12 — Admin & Reporting:
     AdminModule,
     // Stage 13+ (security/QA/perf, deployment) follow.
+  ],
+  providers: [
+    // Apply rate limiting globally.
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
   ],
 })
 export class AppModule {}

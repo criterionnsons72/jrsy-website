@@ -91,8 +91,8 @@ All secrets go through `.env` files (never committed). See `.env.example` files 
 - [x] Stage 9 — Measurement & Sizing: body profiles, formula, validation, tailor review + lock (see `docs/stage-9`)
 - [x] Stage 10 — Virtual Try-On Adapter: provider-agnostic, mock first, consent, secure delete (see `docs/stage-10`)
 - [x] Stage 11 — Order & Production: state machine, workshop dashboard, documents, QC (see `docs/stage-11`)
-- [x] **Stage 12 — Admin & Reporting**: analytics events, KPI report, admin management (see `docs/stage-12`)
-- [ ] Stage 13 — Security, QA & Performance
+- [x] Stage 12 — Admin & Reporting: analytics events, KPI report, admin management (see `docs/stage-12`)
+- [x] **Stage 13 — Security, QA & Performance**: rate limiting, error filter, e2e, a11y, QA report (see `docs/stage-13`)
 - [ ] Stage 14 — Deployment
 
 ---

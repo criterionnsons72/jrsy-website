@@ -3,6 +3,7 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -27,6 +28,9 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
+
+  // Consistent, non-leaky error envelope for every failure.
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // OpenAPI / Swagger
   const config = new DocumentBuilder()
