@@ -7,6 +7,8 @@ import { AuthModule } from './modules/identity/auth.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { CartModule } from './modules/cart/cart.module';
 import { OrderModule } from './modules/order/order.module';
+import { ConfiguratorModule } from './modules/configurator/configurator.module';
+import { PricingModule } from './modules/pricing/pricing.module';
 
 @Module({
   imports: [
@@ -21,8 +23,11 @@ import { OrderModule } from './modules/order/order.module';
     CatalogModule,
     CartModule,
     OrderModule,
-    // Stage 8+ modules (configurator, pricing, measurement, tryon,
-    // checkout, production, documents…) are added here.
+    // Stage 8 — Customization Engine:
+    ConfiguratorModule,
+    PricingModule,
+    // Stage 9+ modules (measurement, tryon, checkout, production, documents…)
+    // are added here.
   ],
 })
 export class AppModule {}

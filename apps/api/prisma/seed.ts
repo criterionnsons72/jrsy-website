@@ -57,6 +57,111 @@ async function main(): Promise<void> {
     );
   }
 
+  // Configuration schema (schema-driven configurator + rules)
+  const kurtaSchemaDef = {
+    currency: 'PKR',
+    baseLeadTimeDays: 5,
+    groups: [
+      {
+        key: 'fabric',
+        label: 'Fabric',
+        type: 'select',
+        required: true,
+        default: 'cotton',
+        choices: [
+          { id: 'cotton', label: 'Cotton', priceDelta: 0 },
+          { id: 'linen', label: 'Linen', priceDelta: 600 },
+          { id: 'wash_wear', label: 'Wash & Wear', priceDelta: 300 },
+        ],
+      },
+      {
+        key: 'collar',
+        label: 'Collar',
+        type: 'select',
+        default: 'band',
+        choices: [
+          { id: 'band', label: 'Band' },
+          { id: 'shirt', label: 'Shirt', priceDelta: 150 },
+          { id: 'wide', label: 'Wide' },
+        ],
+      },
+      {
+        key: 'cuff',
+        label: 'Cuff',
+        type: 'select',
+        default: 'round',
+        choices: [
+          { id: 'round', label: 'Round' },
+          { id: 'square', label: 'Square', priceDelta: 100 },
+        ],
+      },
+      {
+        key: 'pocket',
+        label: 'Pocket',
+        type: 'boolean',
+        default: true,
+      },
+      {
+        key: 'embroidery',
+        label: 'Embroidery',
+        type: 'select',
+        default: 'none',
+        choices: [
+          { id: 'none', label: 'None' },
+          { id: 'chest_logo', label: 'Chest logo', priceDelta: 900, leadTimeDays: 2 },
+          {
+            id: 'full_front',
+            label: 'Full front',
+            priceDelta: 2500,
+            leadTimeDays: 4,
+            requiresApproval: true,
+          },
+        ],
+      },
+      {
+        key: 'length',
+        label: 'Garment length',
+        type: 'number',
+        min: 38,
+        max: 52,
+        unit: 'in',
+        default: 44,
+        pricePerUnitOver: { threshold: 48, amount: 150 },
+      },
+      {
+        key: 'fit',
+        label: 'Fit preference',
+        type: 'select',
+        default: 'regular',
+        choices: [
+          { id: 'slim', label: 'Slim' },
+          { id: 'regular', label: 'Regular' },
+          { id: 'relaxed', label: 'Relaxed' },
+        ],
+      },
+    ],
+    rules: [
+      {
+        id: 'no-wide-collar-on-linen',
+        description: 'Wide collar unavailable on linen',
+        when: [{ group: 'fabric', equals: 'linen' }],
+        then: [{ action: 'disableChoice', group: 'collar', choice: 'wide' }],
+      },
+      {
+        id: 'no-slim-on-relaxed-fabric',
+        description: 'Slim fit needs approval on Wash & Wear',
+        when: [{ group: 'fabric', equals: 'wash_wear' }, { group: 'fit', equals: 'slim' }],
+        then: [{ action: 'requireApproval' }],
+      },
+    ],
+  };
+
+  const configSchema = await prisma.configSchema.upsert({
+    where: { name_version: { name: 'kurta-standard', version: 1 } },
+    update: { definition: kurtaSchemaDef, isPublished: true },
+    create: { name: 'kurta-standard', version: 1, isPublished: true, definition: kurtaSchemaDef },
+  });
+
   // Products
   const products = [
     {
@@ -85,6 +190,7 @@ async function main(): Promise<void> {
         description: p.description,
         basePrice: p.basePrice,
         categoryId: p.categoryId,
+        configSchemaId: configSchema.id,
       },
       create: {
         categoryId: p.categoryId,
@@ -92,6 +198,7 @@ async function main(): Promise<void> {
         slug: p.slug,
         description: p.description,
         basePrice: p.basePrice,
+        configSchemaId: configSchema.id,
       },
     });
 

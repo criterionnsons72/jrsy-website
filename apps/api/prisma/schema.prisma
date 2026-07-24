@@ -102,25 +102,43 @@ model Category {
 }
 
 model Product {
-  id            String          @id @default(uuid())
-  categoryId    String
-  category      Category        @relation(fields: [categoryId], references: [id])
-  title         String
-  slug          String          @unique
-  description   String?
-  basePrice     Decimal         @db.Decimal(10, 2)
-  currency      String          @default("PKR")
-  madeToMeasure Boolean         @default(true)
-  readySize     Boolean         @default(true)
-  isActive      Boolean         @default(true)
-  images        ProductImage[]
-  variants      ProductVariant[]
-  fabrics       ProductFabric[]
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id             String           @id @default(uuid())
+  categoryId     String
+  category       Category         @relation(fields: [categoryId], references: [id])
+  title          String
+  slug           String           @unique
+  description    String?
+  basePrice      Decimal          @db.Decimal(10, 2)
+  currency       String           @default("PKR")
+  madeToMeasure  Boolean          @default(true)
+  readySize      Boolean          @default(true)
+  isActive       Boolean          @default(true)
+  configSchemaId String?
+  configSchema   ConfigSchema?    @relation(fields: [configSchemaId], references: [id])
+  images         ProductImage[]
+  variants       ProductVariant[]
+  fabrics        ProductFabric[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([categoryId])
   @@index([isActive])
+}
+
+// ---------------- Customization (configurator) ----------------
+
+model ConfigSchema {
+  id          String    @id @default(uuid())
+  name        String
+  version     Int       @default(1)
+  // Schema-driven option groups and the rules engine definition (JSONB).
+  definition  Json
+  isPublished Boolean   @default(false)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([name, version])
 }
 
 model ProductImage {

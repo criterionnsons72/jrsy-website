@@ -110,6 +110,12 @@ export default async function ProductPage({ params }: { params: { slug: string }
           )}
 
           <div className="mt-8">
+            <Link
+              href={`/product/${product.slug}/configure`}
+              className="mb-3 inline-block rounded-sm bg-brand px-5 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong"
+            >
+              Customize this garment →
+            </Link>
             <AddToCart productId={product.id} />
             <p className="mt-3 border-l-[3px] border-preview bg-preview-tint px-3 py-2 text-xs text-ink">
               Style Preview (coming next) shows look only — not a guaranteed fit. For fit, use
