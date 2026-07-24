@@ -10,6 +10,7 @@ import { OrderModule } from './modules/order/order.module';
 import { ConfiguratorModule } from './modules/configurator/configurator.module';
 import { PricingModule } from './modules/pricing/pricing.module';
 import { MeasurementModule } from './modules/measurement/measurement.module';
+import { TryOnModule } from './modules/tryon/tryon.module';
 
 @Module({
   imports: [
@@ -29,7 +30,9 @@ import { MeasurementModule } from './modules/measurement/measurement.module';
     PricingModule,
     // Stage 9 — Measurement & Sizing:
     MeasurementModule,
-    // Stage 10+ modules (tryon, checkout, production, documents…) go here.
+    // Stage 10 — Virtual Try-On (mock provider):
+    TryOnModule,
+    // Stage 11+ modules (checkout, production, documents…) go here.
   ],
 })
 export class AppModule {}
