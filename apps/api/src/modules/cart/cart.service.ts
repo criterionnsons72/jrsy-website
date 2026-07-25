@@ -1,11 +1,16 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PricingService } from '../pricing/pricing.service';
+import type { Selections } from '../configurator/schema.types';
 import { AddCartItemDto } from './dto/add-cart-item.dto';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly pricing: PricingService,
+  ) {}
 
   /** Resolve (or lazily create) the cart belonging to a user. */
   private async resolveCart(userId: string): Promise<{ id: string; customerId: string }> {
@@ -38,13 +43,28 @@ export class CartService {
     }
 
     let unitPrice = new Prisma.Decimal(product.basePrice);
-    if (dto.variantId) {
+
+    // A configured (made-to-measure) item prices via the pricing engine so the
+    // cart matches the live price the customer saw on the configurator.
+    if (dto.config) {
+      const quote = await this.pricing.quote(product.slug, dto.config as Selections);
+      if (!quote.valid) {
+        throw new NotFoundException(
+          quote.errors[0] ?? 'This configuration is not valid — please review your options.',
+        );
+      }
+      unitPrice = new Prisma.Decimal(quote.garmentSubtotal);
+    } else if (dto.variantId) {
       const variant = product.variants.find((v) => v.id === dto.variantId && v.isActive);
       if (!variant) {
         throw new NotFoundException('Variant not found for this product.');
       }
       unitPrice = unitPrice.add(variant.priceDelta);
     }
+
+    // Prefer the explicit fit preference; fall back to the fit chosen in the config.
+    const fitPreference =
+      dto.fitPreference ?? (dto.config?.fit != null ? String(dto.config.fit) : null);
 
     await this.prisma.cartItem.create({
       data: {
@@ -54,7 +74,9 @@ export class CartService {
         quantity: dto.quantity,
         unitPrice,
         currency: product.currency,
-        fitPreference: dto.fitPreference ?? null,
+        fitPreference,
+        config: dto.config ? (dto.config as Prisma.InputJsonValue) : undefined,
+        bodyProfileId: dto.bodyProfileId ?? null,
       },
     });
 

@@ -8,15 +8,18 @@ cart, checkout, orders) works without it.
 > You do the clicks in the dashboards; this guide gives the exact values.
 
 ## 0. Accounts
+
 - **railway.app** — sign up with GitHub.
 - (later, for try-on) **Cloudflare R2** — S3-compatible object storage.
 
 ## 1. Create the project + databases
+
 1. Railway → **New Project** → **Deploy from GitHub repo** → pick `jrsy-website`.
 2. In the project, **+ New** → **Database → Add PostgreSQL**.
 3. **+ New** → **Database → Add Redis**.
 
 ## 2. The API service
+
 1. **+ New → GitHub Repo → jrsy-website** (a service).
 2. Service **Settings**:
    - **Root Directory:** `/` (repo root)
@@ -36,6 +39,7 @@ cart, checkout, orders) works without it.
    API docs: `https://<api-domain>/docs`.
 
 ## 3. The web service
+
 1. **+ New → GitHub Repo → jrsy-website** (second service).
 2. Settings:
    - **Root Directory:** `/`
@@ -46,18 +50,23 @@ cart, checkout, orders) works without it.
 4. Deploy, then copy the web URL back into the **API's `CORS_ORIGIN`** and redeploy the API.
 
 ## 4. Seed reference data (once)
+
 In the API service **Settings → Deploy → Custom Start Command** temporarily, or via
 Railway's shell, run once:
+
 ```
 npm run db:seed -w apps/api
 ```
+
 This creates the 12 roles, demo categories, fabrics, and products. (Skip in a real
 production catalog; add your own via the admin.)
 
 ## 5. Try it
+
 Open the web URL → Register → browse the catalog → configure → cart → checkout.
 
 ## 6. Add real try-on (optional, later)
+
 1. Create a **Cloudflare R2** bucket; get endpoint + access key + secret.
 2. Add to the API variables: `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`,
    `S3_ACCESS_KEY`, `S3_SECRET_KEY`.
@@ -66,6 +75,7 @@ Open the web URL → Register → browse the catalog → configure → cart → 
 4. Redeploy the API.
 
 ## Notes
+
 - Secrets live only in Railway variables — never in git.
 - Custom domain: add it in each service's **Settings → Networking**, then update
   `CORS_ORIGIN` / `NEXT_PUBLIC_API_URL`.
