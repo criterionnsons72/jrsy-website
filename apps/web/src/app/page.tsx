@@ -39,12 +39,6 @@ export default function HomePage() {
         >
           {t('home.browse')}
         </Link>
-        <a
-          href="/api/v1/health"
-          className="rounded-sm border border-line-strong px-5 py-3 text-sm text-ink transition hover:bg-surface-2"
-        >
-          {t('home.apiHealth')}
-        </a>
       </div>
     </div>
   );
