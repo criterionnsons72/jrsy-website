@@ -20,12 +20,11 @@ const en: Dict = {
   'nav.signOut': 'Sign out',
   'nav.language': 'Language',
 
-  'home.eyebrow': 'Tailor Master · Foundation',
+  'home.eyebrow': 'Tailor Master · Bespoke Tailoring',
   'home.title': 'Made to measure, from style preview to a garment that actually fits.',
   'home.subtitle':
-    'The design system, theming, and build are wired up. Catalog, configurator, measurements, try-on and the workshop workflow follow in the stages after.',
+    'Browse the collection, personalise every detail, and order a garment tailored to your measurements — checked by a master tailor before it is made.',
   'home.browse': 'Browse catalog',
-  'home.apiHealth': 'API health ↗',
 
   'lane.preview': 'Style Preview',
   'lane.fit': 'Fit Recommendation',
@@ -49,12 +48,11 @@ const ur: Dict = {
   'nav.signOut': 'سائن آؤٹ',
   'nav.language': 'زبان',
 
-  'home.eyebrow': 'ٹیلر ماسٹر · بنیاد',
+  'home.eyebrow': 'ٹیلر ماسٹر · بیسپوک سلائی',
   'home.title': 'ناپ کے مطابق سلائی — اسٹائل پری ویو سے ایسا لباس جو واقعی فٹ ہو۔',
   'home.subtitle':
-    'ڈیزائن سسٹم، تھیم اور بلڈ تیار ہیں۔ کیٹلاگ، کنفیگریٹر، پیمائش، ٹرائی آن اور ورکشاپ ورک فلو اگلے مراحل میں شامل ہوں گے۔',
+    'کیٹلاگ دیکھیں، ہر تفصیل اپنی پسند سے چنیں، اور اپنے ناپ کے مطابق لباس آرڈر کریں — جسے بننے سے پہلے ماسٹر ٹیلر جانچتا ہے۔',
   'home.browse': 'کیٹلاگ دیکھیں',
-  'home.apiHealth': 'API ہیلتھ ↗',
 
   'lane.preview': 'اسٹائل پری ویو',
   'lane.fit': 'فٹ تجویز',
