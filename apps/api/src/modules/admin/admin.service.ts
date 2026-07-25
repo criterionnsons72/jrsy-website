@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 
@@ -87,26 +87,119 @@ export class AdminService {
     });
   }
 
-  createProduct(data: {
+  listProducts() {
+    return this.prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        category: { select: { id: true, name: true } },
+        images: { orderBy: { sortOrder: 'asc' } },
+        configSchema: { select: { id: true, name: true } },
+      },
+    });
+  }
+
+  /**
+   * Create a product. If no configuration schema is given, attach the first
+   * published one so the new product is configurable out of the box.
+   */
+  async createProduct(data: {
     title: string;
     slug: string;
     categoryId: string;
     basePrice: number;
+    description?: string;
+    currency?: string;
     madeToMeasure?: boolean;
     readySize?: boolean;
     configSchemaId?: string;
+    images?: string[];
   }) {
+    const configSchemaId = data.configSchemaId ?? (await this.defaultConfigSchemaId());
     return this.prisma.product.create({
       data: {
         title: data.title,
         slug: data.slug,
         categoryId: data.categoryId,
         basePrice: new Prisma.Decimal(data.basePrice),
+        description: data.description ?? null,
+        currency: data.currency ?? 'PKR',
         madeToMeasure: data.madeToMeasure ?? true,
         readySize: data.readySize ?? true,
-        configSchemaId: data.configSchemaId ?? null,
+        configSchemaId,
+        images: data.images?.length
+          ? { create: data.images.map((url, i) => ({ url, sortOrder: i })) }
+          : undefined,
       },
+      include: { images: true },
     });
+  }
+
+  async updateProduct(
+    id: string,
+    data: {
+      title?: string;
+      categoryId?: string;
+      basePrice?: number;
+      description?: string;
+      currency?: string;
+      madeToMeasure?: boolean;
+      readySize?: boolean;
+      isActive?: boolean;
+      configSchemaId?: string;
+      images?: string[];
+    },
+  ) {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found.');
+
+    // Replace images wholesale when a new list is supplied.
+    if (data.images) {
+      await this.prisma.productImage.deleteMany({ where: { productId: id } });
+    }
+
+    return this.prisma.product.update({
+      where: { id },
+      data: {
+        title: data.title,
+        categoryId: data.categoryId,
+        basePrice: data.basePrice !== undefined ? new Prisma.Decimal(data.basePrice) : undefined,
+        description: data.description,
+        currency: data.currency,
+        madeToMeasure: data.madeToMeasure,
+        readySize: data.readySize,
+        isActive: data.isActive,
+        configSchemaId: data.configSchemaId,
+        images: data.images
+          ? { create: data.images.map((url, i) => ({ url, sortOrder: i })) }
+          : undefined,
+      },
+      include: { images: true },
+    });
+  }
+
+  /**
+   * Remove a product. Products referenced by carts/orders cannot be hard-
+   * deleted, so fall back to deactivating (hiding) them from the storefront.
+   */
+  async deleteProduct(id: string): Promise<{ deleted: boolean; deactivated: boolean }> {
+    const product = await this.prisma.product.findUnique({ where: { id } });
+    if (!product) throw new NotFoundException('Product not found.');
+    try {
+      await this.prisma.product.delete({ where: { id } });
+      return { deleted: true, deactivated: false };
+    } catch {
+      // Foreign-key references (cart items, orders) — hide it instead.
+      await this.prisma.product.update({ where: { id }, data: { isActive: false } });
+      return { deleted: false, deactivated: true };
+    }
+  }
+
+  private async defaultConfigSchemaId(): Promise<string | null> {
+    const schema = await this.prisma.configSchema.findFirst({
+      where: { isPublished: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    return schema?.id ?? null;
   }
 
   // ---- Coupons ----

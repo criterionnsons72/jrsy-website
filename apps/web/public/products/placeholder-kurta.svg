@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Kurta">
+  <rect width="800" height="1000" fill="#EFEAE0"/>
+  <rect x="40" y="40" width="720" height="920" rx="18" fill="#F7F4EE" stroke="#E1D9CB"/>
+  <g fill="none" stroke="#2B3A67" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M300 250 L400 210 L500 250 L560 320 L500 380 L490 400 L490 760 Q490 790 460 790 L340 790 Q310 790 310 760 L310 400 L300 380 L240 320 Z"/>
+    <path d="M400 210 L370 270 L400 330 L430 270 Z" fill="#A67C2E" stroke="none" opacity="0.85"/>
+    <path d="M400 330 L400 760" stroke="#A67C2E" stroke-width="4" stroke-dasharray="2 14"/>
+  </g>
+  <text x="400" y="880" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="34" letter-spacing="6" fill="#2B3A67">KURTA</text>
+  <text x="400" y="925" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="18" letter-spacing="4" fill="#A67C2E">TAILOR MASTER</text>
+</svg>

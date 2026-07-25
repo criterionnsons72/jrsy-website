@@ -250,6 +250,30 @@ async function main(): Promise<void> {
     }
   }
 
+  // Optionally promote an existing user to Super Administrator by email.
+  // Set SEED_ADMIN_EMAIL to the address you registered with, then run the seed.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim();
+  if (adminEmail) {
+    const user = await prisma.user.findFirst({
+      where: { email: { equals: adminEmail, mode: 'insensitive' } },
+    });
+    const superAdmin = await prisma.role.findUnique({ where: { key: 'super_admin' } });
+    if (user && superAdmin) {
+      await prisma.userRole.upsert({
+        where: { userId_roleId: { userId: user.id, roleId: superAdmin.id } },
+        update: {},
+        create: { userId: user.id, roleId: superAdmin.id },
+      });
+      // eslint-disable-next-line no-console
+      console.log(`Granted Super Administrator to ${adminEmail}.`);
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(
+        `SEED_ADMIN_EMAIL set but no matching user found for ${adminEmail} — register first, then re-run.`,
+      );
+    }
+  }
+
   // eslint-disable-next-line no-console
   console.log('Seed complete: roles, categories, fabrics, products.');
 }

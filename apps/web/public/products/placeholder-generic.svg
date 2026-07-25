@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Garment">
+  <rect width="800" height="1000" fill="#EFEAE0"/>
+  <rect x="40" y="40" width="720" height="920" rx="18" fill="#F7F4EE" stroke="#E1D9CB"/>
+  <g fill="none" stroke="#2B3A67" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M330 250 L400 215 L470 250 L555 315 L510 385 L495 365 L495 775 Q495 798 472 798 L328 798 Q305 798 305 775 L305 365 L290 385 L245 315 Z"/>
+    <path d="M400 215 L365 258 L400 305 L435 258 Z"/>
+  </g>
+  <circle cx="400" cy="470" r="42" fill="none" stroke="#A67C2E" stroke-width="5"/>
+  <path d="M383 470 L397 484 L420 456" fill="none" stroke="#A67C2E" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="400" y="880" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="30" letter-spacing="5" fill="#2B3A67">MADE TO MEASURE</text>
+  <text x="400" y="925" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="18" letter-spacing="4" fill="#A67C2E">TAILOR MASTER</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Shirt">
+  <rect width="800" height="1000" fill="#EFEAE0"/>
+  <rect x="40" y="40" width="720" height="920" rx="18" fill="#F7F4EE" stroke="#E1D9CB"/>
+  <g fill="none" stroke="#2B3A67" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M330 240 L400 210 L470 240 L560 300 L520 380 L500 360 L500 770 Q500 795 475 795 L325 795 Q300 795 300 770 L300 360 L280 380 L240 300 Z"/>
+    <path d="M400 210 L360 250 L400 300 L440 250 Z"/>
+    <path d="M400 300 L400 770" stroke="#A67C2E" stroke-width="4" stroke-dasharray="2 14"/>
+    <circle cx="400" cy="420" r="5" fill="#A67C2E" stroke="none"/>
+    <circle cx="400" cy="500" r="5" fill="#A67C2E" stroke="none"/>
+    <circle cx="400" cy="580" r="5" fill="#A67C2E" stroke="none"/>
+  </g>
+  <text x="400" y="880" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="34" letter-spacing="6" fill="#2B3A67">SHIRT</text>
+  <text x="400" y="925" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="18" letter-spacing="4" fill="#A67C2E">TAILOR MASTER</text>
+</svg>
