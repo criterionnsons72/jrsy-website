@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface Choice {
   id: string;
@@ -48,19 +49,25 @@ interface Evaluation {
 type Selections = Record<string, string | number | boolean>;
 
 export default function ConfigurePage({ params }: { params: { slug: string } }) {
+  const router = useRouter();
   const [def, setDef] = useState<Definition | null>(null);
   const [sel, setSel] = useState<Selections>({});
   const [quote, setQuote] = useState<Quote | null>(null);
   const [evalResult, setEval] = useState<Evaluation | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [productId, setProductId] = useState<string | null>(null);
+  const [submit, setSubmit] = useState<'idle' | 'loading' | 'auth' | 'error'>('idle');
 
-  // Load schema + seed defaults.
+  // Load schema + seed defaults, and resolve the product id for cart add.
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch(`/api/v1/configurator/products/${params.slug}/schema`);
-        if (!res.ok) throw new Error();
-        const data = await res.json();
+        const [schemaRes, productRes] = await Promise.all([
+          fetch(`/api/v1/configurator/products/${params.slug}/schema`),
+          fetch(`/api/v1/products/${params.slug}`),
+        ]);
+        if (!schemaRes.ok) throw new Error();
+        const data = await schemaRes.json();
         const definition: Definition = data.definition;
         const defaults: Selections = {};
         definition.groups.forEach((g) => {
@@ -68,11 +75,40 @@ export default function ConfigurePage({ params }: { params: { slug: string } }) 
         });
         setDef(definition);
         setSel(defaults);
+        if (productRes.ok) {
+          const product = await productRes.json();
+          setProductId(product.id ?? null);
+        }
       } catch {
         setLoadError('Could not load the configurator. Is the API running and product seeded?');
       }
     })();
   }, [params.slug]);
+
+  // Add the configured garment to the cart, then continue to the cart page.
+  async function addConfiguredToCart() {
+    if (!productId || !quote || quote.errors.length > 0) return;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('tm_token') : null;
+    if (!token) {
+      setSubmit('auth');
+      return;
+    }
+    setSubmit('loading');
+    try {
+      const res = await fetch('/api/v1/cart/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ productId, quantity: 1, config: sel }),
+      });
+      if (res.ok) {
+        router.push('/cart');
+      } else {
+        setSubmit('error');
+      }
+    } catch {
+      setSubmit('error');
+    }
+  }
 
   const recompute = useCallback(
     async (selections: Selections) => {
@@ -245,13 +281,29 @@ export default function ConfigurePage({ params }: { params: { slug: string } }) 
             )}
 
             <button
-              disabled={!quote || quote.errors.length > 0}
+              onClick={addConfiguredToCart}
+              disabled={!quote || quote.errors.length > 0 || submit === 'loading' || !productId}
               className="mt-4 w-full rounded-sm bg-brand px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-strong disabled:opacity-50"
             >
-              Continue to measurements →
+              {submit === 'loading' ? 'Adding…' : 'Add to cart & continue →'}
             </button>
+            {submit === 'auth' && (
+              <p className="mt-2 font-mono text-[11px] text-warn">
+                Please{' '}
+                <Link href="/login" className="text-brand underline">
+                  sign in
+                </Link>{' '}
+                to add this garment.
+              </p>
+            )}
+            {submit === 'error' && (
+              <p className="mt-2 font-mono text-[11px] text-crit">
+                Could not add to cart — please try again.
+              </p>
+            )}
             <p className="mt-2 font-mono text-[10px] text-faint">
-              Measurement wizard &amp; try-on come in the next stages.
+              Attach measurements &amp; try-on at checkout. A tailor validates your measurements
+              before production.
             </p>
           </div>
         </aside>

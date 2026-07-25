@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsInt, IsObject, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 export class AddCartItemDto {
   @ApiProperty()
@@ -22,4 +22,18 @@ export class AddCartItemDto {
   @IsOptional()
   @IsString()
   fitPreference?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Configurator selections snapshot (fabric, collar, embroidery, …). ' +
+      'When present, the item price reflects the configured garment.',
+  })
+  @IsOptional()
+  @IsObject()
+  config?: Record<string, string | number | boolean>;
+
+  @ApiPropertyOptional({ description: 'Saved body-measurement profile to attach.' })
+  @IsOptional()
+  @IsUUID()
+  bodyProfileId?: string;
 }
