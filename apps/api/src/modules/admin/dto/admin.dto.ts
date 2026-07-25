@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsArray, IsBoolean, IsIn, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateCategoryDto {
   @ApiProperty() @IsString() name!: string;
@@ -21,7 +21,33 @@ export class CreateProductDto {
   @ApiProperty() @IsString() slug!: string;
   @ApiProperty() @IsString() categoryId!: string;
   @ApiProperty() @IsNumber() @Min(0) basePrice!: number;
-  @ApiPropertyOptional() @IsOptional() configSchemaId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() currency?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() madeToMeasure?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() readySize?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsString() configSchemaId?: string;
+  @ApiPropertyOptional({ type: [String], description: 'Image URLs (first is the cover).' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
+}
+
+export class UpdateProductDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() title?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() categoryId?: string;
+  @ApiPropertyOptional() @IsOptional() @IsNumber() @Min(0) basePrice?: number;
+  @ApiPropertyOptional() @IsOptional() @IsString() description?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() currency?: string;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() madeToMeasure?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() readySize?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsBoolean() isActive?: boolean;
+  @ApiPropertyOptional() @IsOptional() @IsString() configSchemaId?: string;
+  @ApiPropertyOptional({ type: [String], description: 'Replaces all images when provided.' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  images?: string[];
 }
 
 export class CreateCouponDto {

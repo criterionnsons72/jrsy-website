@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import {
@@ -6,6 +16,7 @@ import {
   CreateCouponDto,
   CreateFabricDto,
   CreateProductDto,
+  UpdateProductDto,
 } from './dto/admin.dto';
 import { JwtAuthGuard } from '../identity/guards/jwt-auth.guard';
 import { RolesGuard } from '../identity/guards/roles.guard';
@@ -50,9 +61,27 @@ export class AdminController {
   }
 
   @Roles('catalog_manager', 'admin', 'super_admin')
+  @Get('products')
+  listProducts() {
+    return this.admin.listProducts();
+  }
+
+  @Roles('catalog_manager', 'admin', 'super_admin')
   @Post('products')
   createProduct(@Body() dto: CreateProductDto) {
     return this.admin.createProduct(dto);
+  }
+
+  @Roles('catalog_manager', 'admin', 'super_admin')
+  @Patch('products/:id')
+  updateProduct(@Param('id') id: string, @Body() dto: UpdateProductDto) {
+    return this.admin.updateProduct(id, dto);
+  }
+
+  @Roles('catalog_manager', 'admin', 'super_admin')
+  @Delete('products/:id')
+  deleteProduct(@Param('id') id: string) {
+    return this.admin.deleteProduct(id);
   }
 
   // ---- Coupons ----

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" role="img" aria-label="Suit">
+  <rect width="800" height="1000" fill="#EFEAE0"/>
+  <rect x="40" y="40" width="720" height="920" rx="18" fill="#F7F4EE" stroke="#E1D9CB"/>
+  <g fill="none" stroke="#2B3A67" stroke-width="10" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M320 240 L400 215 L480 240 L560 310 L515 380 L505 360 L505 780 Q505 800 485 800 L315 800 Q295 800 295 780 L295 360 L285 380 L240 310 Z"/>
+    <path d="M400 215 L345 260 L400 430 L400 215 Z" fill="#2B3A67" stroke="none" opacity="0.12"/>
+    <path d="M400 215 L455 260 L400 430 L400 215 Z" fill="#2B3A67" stroke="none" opacity="0.12"/>
+    <path d="M400 215 L345 260 L400 430 M400 215 L455 260 L400 430"/>
+    <path d="M370 470 L400 500 L430 470"/>
+    <path d="M470 300 L455 340" stroke="#A67C2E" stroke-width="5"/>
+  </g>
+  <text x="400" y="880" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="34" letter-spacing="6" fill="#2B3A67">SUIT</text>
+  <text x="400" y="925" text-anchor="middle" font-family="'IBM Plex Mono',ui-monospace,monospace" font-size="18" letter-spacing="4" fill="#A67C2E">TAILOR MASTER</text>
+</svg>

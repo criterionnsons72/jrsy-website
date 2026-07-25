@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
 
 interface Overview {
   customers: number;
@@ -68,7 +69,23 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-12">
-      <h1 className="font-serif text-3xl font-semibold tracking-tight text-ink">Dashboard</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className="font-serif text-3xl font-semibold tracking-tight text-ink">Dashboard</h1>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/products"
+            className="rounded-sm bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-strong"
+          >
+            Manage products
+          </Link>
+          <Link
+            href="/admin/rules"
+            className="rounded-sm border border-line-strong px-4 py-2 text-sm text-ink transition hover:bg-surface-2"
+          >
+            Rules
+          </Link>
+        </div>
+      </div>
 
       <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Kpi label="Revenue" value={ov ? money(ov.revenue) : '—'} />
