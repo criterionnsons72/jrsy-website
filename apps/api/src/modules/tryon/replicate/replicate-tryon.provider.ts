@@ -27,12 +27,40 @@ export class ReplicateTryOnProvider implements TryOnProvider {
   readonly name = 'replicate';
   private readonly logger = new Logger(ReplicateTryOnProvider.name);
   private readonly client: Replicate;
-  private readonly version: string;
+  private readonly version?: string;
+  private readonly modelSlug?: string;
+  private resolvedVersion?: string;
 
   constructor(config: ConfigService) {
     const token = config.getOrThrow<string>('REPLICATE_API_TOKEN');
-    this.version = config.getOrThrow<string>('REPLICATE_TRYON_VERSION');
+    // Either pin an exact version id, or give a model "owner/name" and we
+    // resolve its latest version on first use (easier — no hash to copy).
+    this.version = config.get<string>('REPLICATE_TRYON_VERSION') || undefined;
+    this.modelSlug = config.get<string>('REPLICATE_TRYON_MODEL') || undefined;
+    if (!this.version && !this.modelSlug) {
+      throw new Error(
+        'Set REPLICATE_TRYON_VERSION (a version id) or REPLICATE_TRYON_MODEL ("owner/name").',
+      );
+    }
     this.client = new Replicate({ auth: token });
+  }
+
+  /** Resolve the version id — from the pinned value or the model's latest. */
+  private async resolveVersion(): Promise<string> {
+    if (this.version) return this.version;
+    if (this.resolvedVersion) return this.resolvedVersion;
+    const [owner, name] = (this.modelSlug ?? '').split('/');
+    if (!owner || !name) {
+      throw new Error('REPLICATE_TRYON_MODEL must look like "owner/name", e.g. cuuupid/idm-vton.');
+    }
+    const model = await this.client.models.get(owner, name);
+    const id = model.latest_version?.id;
+    if (!id) {
+      throw new Error(`Could not find a version for Replicate model "${this.modelSlug}".`);
+    }
+    this.logger.log(`Resolved ${this.modelSlug} to version ${id}.`);
+    this.resolvedVersion = id;
+    return id;
   }
 
   async createTryOnJob(input: TryOnInput): Promise<ProviderJobRef> {
@@ -41,7 +69,7 @@ export class ReplicateTryOnProvider implements TryOnProvider {
     }
     // Field names below match IDM-VTON; adjust for a different model's schema.
     const prediction = await this.client.predictions.create({
-      version: this.version,
+      version: await this.resolveVersion(),
       input: {
         human_img: input.humanImageUrl,
         garm_img: input.garmentImageUrl,
