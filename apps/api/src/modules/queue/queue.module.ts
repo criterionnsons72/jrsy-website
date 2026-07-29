@@ -23,6 +23,11 @@ import { QUEUES } from './queue.constants';
           connection: {
             host: url.hostname,
             port: Number(url.port || 6379),
+            // Managed Redis (e.g. Railway) requires the credentials from the URL.
+            username: url.username ? decodeURIComponent(url.username) : undefined,
+            password: url.password ? decodeURIComponent(url.password) : undefined,
+            // Support TLS endpoints (rediss://).
+            ...(url.protocol === 'rediss:' ? { tls: {} } : {}),
             // Don't block boot when Redis is down; retry in the background.
             maxRetriesPerRequest: null,
             enableOfflineQueue: true,
