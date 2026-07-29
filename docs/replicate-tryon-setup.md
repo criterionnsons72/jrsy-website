@@ -12,15 +12,28 @@ The try-on module is provider-agnostic. A **mock** ships by default; switch to
 
 ## 2. Configure env (apps/api/.env)
 
+The easy path — give the model **owner/name** and the app resolves its latest
+version automatically (no version hash to copy):
+
 ```env
 TRYON_PROVIDER=replicate
 REPLICATE_API_TOKEN=r8_your_token_here
-REPLICATE_TRYON_VERSION=<the model version id>
-REPLICATE_TRYON_MODEL=cuuupid/idm-vton   # label only, for logs
+REPLICATE_TRYON_MODEL=cuuupid/idm-vton
 ```
 
-Object storage (MinIO/S3) must also be configured so the person photo and the
-generated result can be stored and served via signed URLs.
+To pin an exact version instead (recommended once you go live, so a new model
+release can't change behaviour), also set:
+
+```env
+REPLICATE_TRYON_VERSION=<the model version id>
+```
+
+If `REPLICATE_TRYON_VERSION` is set it wins; otherwise the latest version of
+`REPLICATE_TRYON_MODEL` is used.
+
+Object storage (S3-compatible, e.g. Cloudflare R2 or MinIO) must also be
+configured so the person photo and the generated result can be stored and
+served via signed URLs. For R2, set `S3_REGION=auto`.
 
 ## 3. How it works
 
