@@ -40,9 +40,12 @@ export function AddToCart({ productId }: { productId: string }) {
         >
           {state === 'loading' ? 'Adding…' : 'Add to cart'}
         </button>
-        <button className="rounded-sm bg-brass px-5 py-3 text-sm font-semibold text-white transition hover:bg-brass-strong">
+        <Link
+          href={`/account/tryon?productId=${productId}`}
+          className="rounded-sm bg-brass px-5 py-3 text-sm font-semibold text-white transition hover:bg-brass-strong"
+        >
           ◇ Try your style
-        </button>
+        </Link>
       </div>
       {state === 'done' && (
         <p className="font-mono text-xs text-good">

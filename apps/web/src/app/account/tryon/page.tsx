@@ -1,8 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getAuth } from '@/lib/auth';
 import { readImageMeta, uploadViaPresign } from '@/lib/upload';
+
+interface GarmentOption {
+  id: string;
+  title: string;
+  images: { url: string }[];
+}
 
 interface JobView {
   id: string;
@@ -25,8 +31,34 @@ export default function TryOnPage() {
   const [job, setJob] = useState<JobView | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [products, setProducts] = useState<GarmentOption[]>([]);
+  const [productId, setProductId] = useState<string>('');
 
   const token = () => getAuth().token;
+
+  // Load garments to try on; preselect the one passed via ?productId=.
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/v1/products');
+        if (!res.ok) return;
+        const data = await res.json();
+        const items: GarmentOption[] = data.items ?? data;
+        setProducts(items);
+        const fromQuery =
+          typeof window !== 'undefined'
+            ? new URLSearchParams(window.location.search).get('productId')
+            : null;
+        const initial =
+          fromQuery && items.some((p) => p.id === fromQuery) ? fromQuery : items[0]?.id;
+        if (initial) setProductId(initial);
+      } catch {
+        /* products are optional to load; the selector just stays empty */
+      }
+    })();
+  }, []);
+
+  const selectedGarment = products.find((p) => p.id === productId);
 
   async function grantConsent() {
     setMsg(null);
@@ -40,6 +72,7 @@ export default function TryOnPage() {
   }
 
   async function createJob() {
+    if (!productId) return setMsg('Please choose a garment to try on.');
     if (!file) return setMsg('Please choose a photo first.');
     setBusy(true);
     setMsg(null);
@@ -54,6 +87,7 @@ export default function TryOnPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${t}` },
         body: JSON.stringify({
+          productId: productId || undefined,
           inputAssetKey: key,
           imageMeta: { width: meta.width, height: meta.height, hasFullBody: true },
         }),
@@ -115,7 +149,7 @@ export default function TryOnPage() {
           ◇ Style Preview
         </span>
         <span className="rounded-full bg-brass-tint px-3 py-1 font-mono text-xs text-brass">
-          Mock provider
+          Look only · not a fit
         </span>
       </div>
       <h1 className="mt-3 font-serif text-3xl font-semibold tracking-tight text-ink">
@@ -124,6 +158,30 @@ export default function TryOnPage() {
 
       <div className="mt-6 rounded-lg border border-line bg-surface p-5">
         <label className="block">
+          <span className="text-sm font-medium text-ink">Garment to try on</span>
+          <select
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            className="mt-2 block w-full rounded-sm border border-line-strong bg-surface px-3 py-2 text-sm text-ink"
+          >
+            {products.length === 0 && <option value="">No garments available</option>}
+            {products.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </label>
+        {selectedGarment?.images?.[0]?.url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={selectedGarment.images[0].url}
+            alt={selectedGarment.title}
+            className="mt-3 h-28 w-24 rounded border border-line object-cover"
+          />
+        )}
+
+        <label className="mt-5 block">
           <span className="text-sm font-medium text-ink">Full-body photo</span>
           <input
             type="file"
