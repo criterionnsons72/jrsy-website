@@ -32,6 +32,11 @@
   padding: 10px 12px;
   background: linear-gradient(90deg, #12263a, #0f1826);
   border-bottom: 1px solid #1f2a3a;
+  cursor: grab; /* header se drag karke panel move karein */
+  user-select: none;
+}
+.cnai-header.cnai-dragging {
+  cursor: grabbing;
 }
 .cnai-title {
   font-size: 14px;

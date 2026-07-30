@@ -201,6 +201,7 @@
     actions.appendChild(minBtn);
     header.appendChild(title);
     header.appendChild(actions);
+    makeDraggable(header); // header se pakad kar panel move karo
 
     // Search
     const searchWrap = document.createElement("div");
@@ -262,6 +263,71 @@
     return b;
   }
 
+  // -- Drag: panel ko header se pakad kar move karo (position save hoti hai) --
+  const POS_KEY = "cnai_panel_pos";
+  function applyPosition(pos) {
+    if (!pos) return;
+    // Screen ke andar hi rakho (kahin bahar na chala jaye).
+    const maxX = Math.max(0, window.innerWidth - 60);
+    const maxY = Math.max(0, window.innerHeight - 60);
+    const x = Math.min(Math.max(0, pos.left), maxX);
+    const y = Math.min(Math.max(0, pos.top), maxY);
+    panelEl.style.left = x + "px";
+    panelEl.style.top = y + "px";
+    panelEl.style.right = "auto";
+  }
+  function loadPosition() {
+    try {
+      chrome.storage.local.get([POS_KEY], (res) => applyPosition(res && res[POS_KEY]));
+    } catch (e) {
+      /* ignore */
+    }
+  }
+  function savePosition(pos) {
+    try {
+      chrome.storage.local.set({ [POS_KEY]: pos });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+  function makeDraggable(handle) {
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let baseLeft = 0;
+    let baseTop = 0;
+
+    handle.addEventListener("mousedown", (e) => {
+      // Buttons (refresh/minimize) par click ko drag na samjho.
+      if (e.target.closest(".cnai-icon-btn")) return;
+      dragging = true;
+      const rect = panelEl.getBoundingClientRect();
+      baseLeft = rect.left;
+      baseTop = rect.top;
+      startX = e.clientX;
+      startY = e.clientY;
+      panelEl.style.left = baseLeft + "px";
+      panelEl.style.top = baseTop + "px";
+      panelEl.style.right = "auto";
+      handle.classList.add("cnai-dragging");
+      e.preventDefault();
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!dragging) return;
+      applyPosition({
+        left: baseLeft + (e.clientX - startX),
+        top: baseTop + (e.clientY - startY),
+      });
+    });
+    window.addEventListener("mouseup", () => {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove("cnai-dragging");
+      const rect = panelEl.getBoundingClientRect();
+      savePosition({ left: rect.left, top: rect.top });
+    });
+  }
+
   function buildLauncher() {
     launcherEl = document.createElement("button");
     launcherEl.type = "button";
@@ -284,6 +350,7 @@
   function init() {
     buildPanel();
     buildLauncher();
+    loadPosition();
     loadBookmarks().then(render);
 
     const observer = new MutationObserver(scheduleRender);

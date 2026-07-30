@@ -17,6 +17,7 @@ jaata hai — bilkul waise jaise aap ke sir wale extension me hota hai.
 - ⭐ **Bookmark** — kisi item par star lagao, wo save reh jaata hai; "صرف بک مارک"
   toggle se sirf bookmarks dekhein (har chat ke apne bookmarks)
 - 🔄 Naye messages aate hi list khud update ho jaati hai
+- ✋ **Drag** — panel ko header se pakad kar kahin bhi move karo; jagah save reh jaati hai
 - ➖ Panel ko minimize/kholne ke liye chhota button
 - 🌙 Dark theme, Urdu + English dono text theek dikhte hain
 
