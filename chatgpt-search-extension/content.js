@@ -203,6 +203,11 @@
     header.appendChild(title);
     header.appendChild(actions);
     makeDraggable(header); // header se pakad kar panel move karo
+    // Header par double-click = foran chhote star me minimize
+    header.addEventListener("dblclick", (e) => {
+      if (e.target.closest(".cnai-icon-btn")) return;
+      if (isOpen) togglePanel();
+    });
 
     // Search
     const searchWrap = document.createElement("div");

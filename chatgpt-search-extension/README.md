@@ -22,6 +22,7 @@ jaata hai — bilkul waise jaise aap ke sir wale extension me hota hai.
   na ho to minimize (—) karke wapas star bana do
 - ✋ **Drag** — panel ko header se, aur launcher star ko bhi, pakad kar kahin bhi
   move karo; dono ki jagah save reh jaati hai
+- 🖱️ **Double-click** panel ke header par = foran chhote star me minimize
 - 🌙 Dark theme, Urdu + English dono text theek dikhte hain
 
 ## Install kaise karein (Load unpacked)
