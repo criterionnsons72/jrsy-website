@@ -1,9 +1,11 @@
 # Chat Navigator AI 🔖
 
-Ek chhota Chrome extension jo **ChatGPT** ki chat me aap ke saare sawalon
-(prompts) ki ek numbered list bana deta hai. Aap unhe **search** kar sakte ho
-aur kisi bhi sawal par **click** karte hi page seedha us message tak scroll ho
-jaata hai — bilkul waise jaise aap ke sir wale extension me hota hai.
+Ek chhota Chrome extension jo AI chat me aap ke saare sawalon (prompts) ki ek
+numbered list bana deta hai. Aap unhe **search** kar sakte ho aur kisi bhi sawal
+par **click** karte hi page seedha us message tak scroll ho jaata hai.
+
+**Kaam karta hai in par:** ChatGPT, Claude (claude.ai), Google Gemini — poora
+support. DeepSeek, Grok, Perplexity, Copilot par best-effort (auto-detect).
 
 > Poora kaam sirf aap ke browser ke andar (page ke DOM par) hota hai. Koi data
 > kahin bheja nahi jaata, koi login/API key ki zaroorat nahi.
@@ -44,18 +46,39 @@ Extension icon (toolbar me 🔖) par click karke panel ko chhupa/dikha bhi sakte
 - `styles.css` — panel ka look (dark + teal).
 - `background.js` — toolbar icon click par panel toggle karta hai.
 
-## Agar list khaali dikhe
+## Nayi site add karni ho / list khaali dikhe
 
-ChatGPT apna page structure kabhi-kabhi badalta rehta hai. Us soorat me
-`content.js` me sirf yeh line update karni hogi:
+Har site ka HTML alag hota hai, is liye `content.js` me `SITE_CONFIGS` naam ka
+ek config hai jisme har site ke selectors hain:
 
 ```js
-const USER_MSG_SELECTOR = '[data-message-author-role="user"]';
+const SITE_CONFIGS = [
+  {
+    name: "ChatGPT",
+    match: /(^|\.)chatgpt\.com$|(^|\.)chat\.openai\.com$/,
+    user: ['[data-message-author-role="user"]'],
+    assistant: ['[data-message-author-role="assistant"]'],
+  },
+  // ... Claude, Gemini, DeepSeek
+];
 ```
+
+**Nayi site add karne ke steps:**
+
+1. Us site par `F12` (DevTools) kholo.
+2. Apne kisi message par right-click → **Inspect**.
+3. Us element ka koi unique attribute/class dekho (jaise
+   `data-testid="user-message"`).
+4. `SITE_CONFIGS` me naya entry add karo: `match` me site ka host, `user` aur
+   `assistant` me apne aur AI ke message ke selectors.
+5. `manifest.json` ke `matches` me bhi us site ka URL add karo.
+6. `chrome://extensions` par extension **refresh** karo.
+
+> Site config me na ho to extension ek **generic** best-effort mode aazmata hai —
+> kabhi chal jaata hai, kabhi nahi. Pukhta support ke liye upar wale steps behtar.
 
 ## Customize karna ho to
 
-- Panel ki jagah/rang: `styles.css` me `.cnai-panel` aur `--teal` (#2dd4bf) values.
+- Panel ka rang: `styles.css` me `#c9d42d` (accent) ki jagah naya rang.
 - Preview length: `content.js` me `MAX_PREVIEW_LEN`.
-- Sirf apne prompts ki bajaye AI ke jawab bhi chahiye ho to selector me
-  `[data-message-author-role="assistant"]` add kar sakte ho.
+- Nayi site ke selectors: `content.js` me `SITE_CONFIGS`.

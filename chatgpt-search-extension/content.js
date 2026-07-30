@@ -18,10 +18,86 @@
   window.__chatNavigatorAiLoaded = true;
 
   // -- Constants -----------------------------------------------------------
-  const USER_SELECTOR = '[data-message-author-role="user"]';
-  const ASSISTANT_SELECTOR = '[data-message-author-role="assistant"]';
   const HIGHLIGHT_CLASS = "cnai-highlight";
   const MAX_PREVIEW_LEN = 90;
+
+  /*
+   * Har AI chat site ka HTML structure alag hota hai, is liye har site ke apne
+   * selectors chahiye. Neeche config me har site ke liye user aur assistant
+   * messages dhoondhne ke selectors hain. Ek se zyada selectors is liye diye
+   * hain ke agar site apna markup badle to doosra fallback chal jaye.
+   *
+   * Nayi site add karni ho to: us site par DevTools (F12) kholo, kisi apne
+   * message par right-click > Inspect karo, aur uska unique selector yahan add
+   * kar do — bas.
+   */
+  const SITE_CONFIGS = [
+    {
+      name: "ChatGPT",
+      match: /(^|\.)chatgpt\.com$|(^|\.)chat\.openai\.com$/,
+      user: ['[data-message-author-role="user"]'],
+      assistant: ['[data-message-author-role="assistant"]'],
+    },
+    {
+      name: "Claude",
+      match: /(^|\.)claude\.ai$/,
+      user: ['[data-testid="user-message"]', ".font-user-message"],
+      assistant: [".font-claude-message", '[data-testid="assistant-message"]'],
+    },
+    {
+      name: "Gemini",
+      match: /(^|\.)gemini\.google\.com$/,
+      user: [".query-text", "user-query"],
+      assistant: [".model-response-text", "message-content"],
+    },
+    {
+      name: "DeepSeek",
+      match: /(^|\.)deepseek\.com$/,
+      user: ['[class*="_user"]', ".fbb737a4"],
+      assistant: ['[class*="_assistant"]', ".ds-markdown"],
+    },
+  ];
+
+  // Un sites ke liye jo upar list me nahi (grok, perplexity, copilot, waghera):
+  // aam patterns aazma kar best-effort list banate hain.
+  const GENERIC_CONFIG = {
+    name: "Generic",
+    match: /.*/,
+    user: [
+      '[data-message-author-role="user"]',
+      '[data-testid="user-message"]',
+      ".user-message",
+      ".query-text",
+      '[class*="user"][class*="message"]',
+    ],
+    assistant: [
+      '[data-message-author-role="assistant"]',
+      ".font-claude-message",
+      ".model-response-text",
+      '[class*="assistant"][class*="message"]',
+      ".markdown",
+    ],
+  };
+
+  // Is site ke liye theek config chuno.
+  function getSiteConfig() {
+    const host = location.hostname;
+    return SITE_CONFIGS.find((c) => c.match.test(host)) || GENERIC_CONFIG;
+  }
+
+  const SITE = getSiteConfig();
+
+  // List me se pehla selector jiske matches page par mojood hon (warna pehla).
+  function pickSelector(list) {
+    for (const s of list) {
+      try {
+        if (document.querySelector(s)) return s;
+      } catch (e) {
+        /* invalid selector ignore */
+      }
+    }
+    return list[0];
+  }
 
   // -- State ---------------------------------------------------------------
   let panelEl, listEl, searchEl, countEl, launcherEl;
@@ -67,18 +143,33 @@
 
   // -- Helpers -------------------------------------------------------------
   function collectPrompts() {
-    const selector = showAssistant
-      ? `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`
-      : USER_SELECTOR;
-    return Array.from(document.querySelectorAll(selector))
-      .map((el) => ({
-        el,
-        text: (el.innerText || "").trim(),
-        role:
-          el.getAttribute("data-message-author-role") === "assistant"
-            ? "assistant"
-            : "user",
-      }))
+    const userSel = pickSelector(SITE.user);
+    const asstSel = pickSelector(SITE.assistant);
+    // Sirf sawal, ya sawal + jawab — user ki toggle ke hisaab se.
+    const combined = showAssistant ? `${userSel}, ${asstSel}` : userSel;
+
+    let nodes;
+    try {
+      nodes = Array.from(document.querySelectorAll(combined));
+    } catch (e) {
+      nodes = [];
+    }
+
+    return nodes
+      .map((el) => {
+        // Role decide karo: jo user-selector se match kare wo "user".
+        let isUser = false;
+        try {
+          isUser = el.matches(userSel);
+        } catch (e) {
+          /* ignore */
+        }
+        return {
+          el,
+          text: (el.innerText || "").trim(),
+          role: isUser ? "user" : "assistant",
+        };
+      })
       .filter((p) => p.text.length > 0);
   }
 
@@ -120,7 +211,10 @@
     if (prompts.length === 0) {
       const empty = document.createElement("div");
       empty.className = "cnai-empty";
-      empty.textContent = "Is chat me abhi kuch nahi mila.";
+      empty.textContent =
+        SITE.name === "Generic"
+          ? "Is site ka format auto-detect nahi hua. (README me selector add karna dekhein.)"
+          : "Is chat me abhi kuch nahi mila.";
       listEl.appendChild(empty);
       countEl.textContent = "0 items";
       return;
