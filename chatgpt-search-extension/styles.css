@@ -44,7 +44,7 @@
   letter-spacing: 0.2px;
 }
 .cnai-title b {
-  color: #2dd4bf;
+  color: #c9d42d;
 }
 .cnai-logo {
   margin-inline-end: 4px;
@@ -89,8 +89,8 @@
   outline: none;
 }
 .cnai-search input:focus {
-  border-color: #2dd4bf;
-  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15);
+  border-color: #c9d42d;
+  box-shadow: 0 0 0 2px rgba(201, 212, 45, 0.15);
 }
 .cnai-search input::placeholder {
   color: #64748b;
@@ -115,13 +115,13 @@
   transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
 .cnai-chip:hover {
-  border-color: #2dd4bf;
+  border-color: #c9d42d;
   color: #cbd5e1;
 }
 .cnai-chip.on {
-  background: #2dd4bf;
-  color: #06231f;
-  border-color: #2dd4bf;
+  background: #c9d42d;
+  color: #1e2600;
+  border-color: #c9d42d;
   font-weight: 600;
 }
 
@@ -159,15 +159,15 @@
 }
 .cnai-item:hover {
   background: #1a2a40;
-  border-color: #2dd4bf;
+  border-color: #c9d42d;
 }
 .cnai-num {
   flex: 0 0 auto;
   min-width: 26px;
   padding: 1px 6px;
   border-radius: 6px;
-  background: #2dd4bf;
-  color: #06231f;
+  background: #c9d42d;
+  color: #1e2600;
   font-weight: 700;
   font-size: 11px;
   text-align: center;
@@ -229,8 +229,8 @@
   height: 46px;
   border: 2px solid rgba(6, 35, 31, 0.25);
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #4ff0da, #2dd4bf);
-  color: #06231f;
+  background: radial-gradient(circle at 30% 30%, #e6ef5a, #c9d42d);
+  color: #1e2600;
   font-size: 22px;
   line-height: 1;
   cursor: grab;
@@ -242,7 +242,7 @@
 }
 .cnai-launcher:hover {
   transform: scale(1.08);
-  box-shadow: 0 8px 24px rgba(45, 212, 191, 0.5);
+  box-shadow: 0 8px 24px rgba(201, 212, 45, 0.5);
 }
 .cnai-launcher:active {
   cursor: grabbing;
@@ -259,6 +259,6 @@
     background-color: transparent;
   }
   25% {
-    background-color: rgba(45, 212, 191, 0.22);
+    background-color: rgba(201, 212, 45, 0.22);
   }
 }
