@@ -1,0 +1,197 @@
+/*
+ * Chat Navigator AI — panel styles
+ * Sabhi classes "cnai-" prefix ke sath hain taake ChatGPT ke apne styles se
+ * takrav (conflict) na ho. Colors screenshot jaise dark + teal theme ke hain.
+ */
+
+.cnai-panel {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 300px;
+  max-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  background: #0f1826;
+  color: #e5e7eb;
+  border: 1px solid #1f2a3a;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, "Segoe UI", Roboto, "Noto Nastaliq Urdu",
+    system-ui, sans-serif;
+  font-size: 13px;
+  z-index: 2147483000; /* har cheez ke upar rahe */
+  overflow: hidden;
+}
+
+/* Header */
+.cnai-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: linear-gradient(90deg, #12263a, #0f1826);
+  border-bottom: 1px solid #1f2a3a;
+}
+.cnai-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.cnai-title b {
+  color: #2dd4bf;
+}
+.cnai-logo {
+  margin-inline-end: 4px;
+}
+.cnai-actions {
+  display: flex;
+  gap: 4px;
+}
+.cnai-icon-btn {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 7px;
+  background: #1b2a3d;
+  color: #cbd5e1;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+.cnai-icon-btn:hover {
+  background: #274056;
+  color: #fff;
+}
+
+/* Search */
+.cnai-search {
+  padding: 10px 12px;
+}
+.cnai-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid #24344a;
+  background: #0b1420;
+  color: #e5e7eb;
+  font-size: 13px;
+  outline: none;
+}
+.cnai-search input:focus {
+  border-color: #2dd4bf;
+  box-shadow: 0 0 0 2px rgba(45, 212, 191, 0.15);
+}
+.cnai-search input::placeholder {
+  color: #64748b;
+}
+
+/* List */
+.cnai-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cnai-list::-webkit-scrollbar {
+  width: 8px;
+}
+.cnai-list::-webkit-scrollbar-thumb {
+  background: #24344a;
+  border-radius: 8px;
+}
+
+.cnai-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  text-align: start;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: #131f30;
+  color: #e2e8f0;
+  cursor: pointer;
+  font: inherit;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.cnai-item:hover {
+  background: #1a2a40;
+  border-color: #2dd4bf;
+}
+.cnai-num {
+  flex: 0 0 auto;
+  min-width: 26px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: #2dd4bf;
+  color: #06231f;
+  font-weight: 700;
+  font-size: 11px;
+  text-align: center;
+}
+.cnai-text {
+  flex: 1;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.cnai-empty {
+  padding: 20px 12px;
+  text-align: center;
+  color: #64748b;
+}
+
+/* Footer count */
+.cnai-count {
+  padding: 9px 12px;
+  border-top: 1px solid #1f2a3a;
+  color: #94a3b8;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* Chhupe hue panel ka launcher button */
+.cnai-launcher {
+  position: fixed;
+  top: 80px;
+  right: 16px;
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #2dd4bf;
+  color: #06231f;
+  font-size: 18px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+  z-index: 2147483000;
+}
+.cnai-launcher:hover {
+  background: #34e3ce;
+}
+
+/* Message par jump karne par thoda highlight flash */
+.cnai-highlight {
+  animation: cnai-flash 1.6s ease;
+  border-radius: 10px;
+}
+@keyframes cnai-flash {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  25% {
+    background-color: rgba(45, 212, 191, 0.22);
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Chat Navigator AI — ChatGPT Prompt Search",
+  "version": "1.0.0",
+  "description": "ChatGPT chat me apne saare sawalon (prompts) ki list banata hai, unhe search karo aur ek click par us message tak pahunch jao.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Chat Navigator AI — panel toggle karein",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
