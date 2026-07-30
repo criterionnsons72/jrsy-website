@@ -17,8 +17,11 @@ jaata hai — bilkul waise jaise aap ke sir wale extension me hota hai.
 - ⭐ **Bookmark** — kisi item par star lagao, wo save reh jaata hai; "صرف بک مارک"
   toggle se sirf bookmarks dekhein (har chat ke apne bookmarks)
 - 🔄 Naye messages aate hi list khud update ho jaati hai
-- ✋ **Drag** — panel ko header se pakad kar kahin bhi move karo; jagah save reh jaati hai
-- ➖ Panel ko minimize/kholne ke liye chhota button
+- ⭐ **Chhota launcher** — extension on hote hi screen par sirf ek chhota
+  star/circle ⭐ aata hai; click karo to poora panel khul jaata hai, zaroorat
+  na ho to minimize (—) karke wapas star bana do
+- ✋ **Drag** — panel ko header se, aur launcher star ko bhi, pakad kar kahin bhi
+  move karo; dono ki jagah save reh jaati hai
 - 🌙 Dark theme, Urdu + English dono text theek dikhte hain
 
 ## Install kaise karein (Load unpacked)

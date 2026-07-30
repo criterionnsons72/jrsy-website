@@ -27,7 +27,7 @@
   let panelEl, listEl, searchEl, countEl, launcherEl;
   let roleToggleBtn, bmToggleBtn;
   let prompts = []; // { el, text, role }
-  let isOpen = true;
+  let isOpen = false; // default: sirf chhota star/circle dikhega, click par khulega
   let showAssistant = false; // false = sirf mere sawal, true = jawab bhi
   let onlyBookmarks = false;
   let bookmarks = new Set(); // is conversation ke bookmark kiye gaye texts
@@ -183,6 +183,7 @@
     panelEl = document.createElement("div");
     panelEl.className = "cnai-panel";
     panelEl.setAttribute("dir", "rtl");
+    panelEl.style.display = "none"; // default band; launcher par click se khulega
 
     // Header
     const header = document.createElement("div");
@@ -328,15 +329,77 @@
     });
   }
 
+  const LAUNCHER_POS_KEY = "cnai_launcher_pos";
   function buildLauncher() {
     launcherEl = document.createElement("button");
     launcherEl.type = "button";
     launcherEl.className = "cnai-launcher";
     launcherEl.title = "Chat Navigator AI kholein";
-    launcherEl.textContent = "🔖";
-    launcherEl.style.display = "none";
-    launcherEl.addEventListener("click", () => togglePanel());
+    launcherEl.textContent = "★"; // circle ke andar star
+    launcherEl.style.display = "flex"; // default: launcher dikhe (panel band)
+    makeLauncherDraggable(launcherEl);
     document.body.appendChild(launcherEl);
+    // Saved launcher position (agar user ne pehle move kiya ho).
+    try {
+      chrome.storage.local.get([LAUNCHER_POS_KEY], (res) => {
+        const p = res && res[LAUNCHER_POS_KEY];
+        if (p) placeLauncher(p.left, p.top);
+      });
+    } catch (e) {
+      /* ignore */
+    }
+  }
+
+  function placeLauncher(left, top) {
+    const maxX = Math.max(0, window.innerWidth - 48);
+    const maxY = Math.max(0, window.innerHeight - 48);
+    launcherEl.style.left = Math.min(Math.max(0, left), maxX) + "px";
+    launcherEl.style.top = Math.min(Math.max(0, top), maxY) + "px";
+    launcherEl.style.right = "auto";
+  }
+
+  // Launcher ko drag kiya ja sakta hai; agar bilkul move na ho to use click samjho.
+  function makeLauncherDraggable(el) {
+    let down = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let baseLeft = 0;
+    let baseTop = 0;
+
+    el.addEventListener("mousedown", (e) => {
+      down = true;
+      moved = false;
+      const rect = el.getBoundingClientRect();
+      baseLeft = rect.left;
+      baseTop = rect.top;
+      startX = e.clientX;
+      startY = e.clientY;
+      e.preventDefault();
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (!down) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+      if (moved) placeLauncher(baseLeft + dx, baseTop + dy);
+    });
+    window.addEventListener("mouseup", () => {
+      if (!down) return;
+      down = false;
+      if (moved) {
+        const rect = el.getBoundingClientRect();
+        try {
+          chrome.storage.local.set({
+            [LAUNCHER_POS_KEY]: { left: rect.left, top: rect.top },
+          });
+        } catch (e) {
+          /* ignore */
+        }
+      } else {
+        togglePanel(); // move nahi hua = simple click = panel kholo
+      }
+    });
   }
 
   function togglePanel() {
