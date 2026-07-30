@@ -2,47 +2,86 @@
  * Chat Navigator AI — content script
  * -----------------------------------
  * ChatGPT page par ek chhota sa panel dikhata hai jisme is conversation ke
- * saare user prompts (sawal) number ke sath list hote hain. Aap search bar se
- * unhe filter kar sakte ho, aur kisi bhi item par click karo to page us message
- * tak scroll ho jaata hai aur wo message ek pal ke liye highlight ho jaata hai.
+ * messages number ke sath list hote hain. Aap:
+ *   - search bar se unhe filter kar sakte ho,
+ *   - "جواب بھی" toggle se sirf apne sawal ya sawal + AI ke jawab dekh sakte ho,
+ *   - kisi bhi item par ⭐ laga kar use bookmark kar sakte ho (save rehta hai),
+ *   - kisi item par click karke seedha us message tak scroll kar sakte ho.
  *
- * Yeh poora kaam sirf DOM par hota hai — koi network call, koi data collection
- * nahi. Extension aapki chat kahin nahi bhejta.
+ * Yeh poora kaam sirf DOM + browser storage par hota hai — koi network call,
+ * koi data collection nahi. Aapki chat kahin bheji nahi jaati.
  */
 (function () {
   "use strict";
 
-  // Ek hi baar inject karein (SPA navigation par dobara chal sakta hai).
   if (window.__chatNavigatorAiLoaded) return;
   window.__chatNavigatorAiLoaded = true;
 
   // -- Constants -----------------------------------------------------------
-  // ChatGPT har user message ko is attribute se mark karta hai. Agar kabhi
-  // OpenAI markup badle to yahan selector update karna kaafi hoga.
-  const USER_MSG_SELECTOR = '[data-message-author-role="user"]';
+  const USER_SELECTOR = '[data-message-author-role="user"]';
+  const ASSISTANT_SELECTOR = '[data-message-author-role="assistant"]';
   const HIGHLIGHT_CLASS = "cnai-highlight";
-  const MAX_PREVIEW_LEN = 90; // list me kitne characters ka preview dikhana hai
+  const MAX_PREVIEW_LEN = 90;
 
   // -- State ---------------------------------------------------------------
-  let panelEl = null;
-  let listEl = null;
-  let searchEl = null;
-  let countEl = null;
-  let prompts = []; // { el, text }
+  let panelEl, listEl, searchEl, countEl, launcherEl;
+  let roleToggleBtn, bmToggleBtn;
+  let prompts = []; // { el, text, role }
   let isOpen = true;
+  let showAssistant = false; // false = sirf mere sawal, true = jawab bhi
+  let onlyBookmarks = false;
+  let bookmarks = new Set(); // is conversation ke bookmark kiye gaye texts
+  let convKey = bmStorageKey();
   let refreshTimer = null;
 
-  // -- Helpers -------------------------------------------------------------
+  // -- Bookmarks (chrome.storage me save) ----------------------------------
+  // Har conversation ki apni key (URL path se), taake bookmarks alag rahein.
+  function bmStorageKey() {
+    return "cnai_bm_" + location.pathname;
+  }
+  function loadBookmarks() {
+    return new Promise((resolve) => {
+      try {
+        chrome.storage.local.get([convKey], (res) => {
+          bookmarks = new Set((res && res[convKey]) || []);
+          resolve();
+        });
+      } catch (e) {
+        bookmarks = new Set();
+        resolve();
+      }
+    });
+  }
+  function saveBookmarks() {
+    try {
+      chrome.storage.local.set({ [convKey]: Array.from(bookmarks) });
+    } catch (e) {
+      /* storage na ho to chup rahein */
+    }
+  }
+  function toggleBookmark(text) {
+    if (bookmarks.has(text)) bookmarks.delete(text);
+    else bookmarks.add(text);
+    saveBookmarks();
+  }
 
-  // Page se saare user prompts nikaalo (document order me).
+  // -- Helpers -------------------------------------------------------------
   function collectPrompts() {
-    const nodes = Array.from(document.querySelectorAll(USER_MSG_SELECTOR));
-    return nodes
-      .map((el) => ({ el, text: (el.innerText || "").trim() }))
+    const selector = showAssistant
+      ? `${USER_SELECTOR}, ${ASSISTANT_SELECTOR}`
+      : USER_SELECTOR;
+    return Array.from(document.querySelectorAll(selector))
+      .map((el) => ({
+        el,
+        text: (el.innerText || "").trim(),
+        role:
+          el.getAttribute("data-message-author-role") === "assistant"
+            ? "assistant"
+            : "user",
+      }))
       .filter((p) => p.text.length > 0);
   }
 
-  // Text ka chhota preview banao list ke liye.
   function preview(text) {
     const oneLine = text.replace(/\s+/g, " ").trim();
     return oneLine.length > MAX_PREVIEW_LEN
@@ -50,7 +89,6 @@
       : oneLine;
   }
 
-  // Kisi message tak scroll karo aur usay thodi der highlight karo.
   function goToPrompt(item) {
     if (!item.el || !document.body.contains(item.el)) return;
     item.el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -58,22 +96,23 @@
     window.setTimeout(() => item.el.classList.remove(HIGHLIGHT_CLASS), 1600);
   }
 
-  // Search query ke hisaab se list items ko dikhao/chhupao.
   function applyFilter() {
     const q = (searchEl.value || "").trim().toLowerCase();
     let visible = 0;
     listEl.querySelectorAll(".cnai-item").forEach((li) => {
       const text = li.dataset.text || "";
-      const match = q === "" || text.toLowerCase().includes(q);
-      li.style.display = match ? "" : "none";
-      if (match) visible++;
+      const matchText = q === "" || text.toLowerCase().includes(q);
+      const matchBm = !onlyBookmarks || bookmarks.has(text);
+      const show = matchText && matchBm;
+      li.style.display = show ? "" : "none";
+      if (show) visible++;
     });
-    countEl.textContent = q
-      ? `${visible} / ${prompts.length} sawal`
-      : `${prompts.length} sawal`;
+    countEl.textContent =
+      q || onlyBookmarks
+        ? `${visible} / ${prompts.length} items`
+        : `${prompts.length} items`;
   }
 
-  // List ko dobara render karo (jab naye messages aayein ya chat change ho).
   function render() {
     prompts = collectPrompts();
     listEl.innerHTML = "";
@@ -81,51 +120,71 @@
     if (prompts.length === 0) {
       const empty = document.createElement("div");
       empty.className = "cnai-empty";
-      empty.textContent = "Is chat me abhi koi sawal nahi mila.";
+      empty.textContent = "Is chat me abhi kuch nahi mila.";
       listEl.appendChild(empty);
-      countEl.textContent = "0 sawal";
+      countEl.textContent = "0 items";
       return;
     }
 
     prompts.forEach((item, idx) => {
-      const li = document.createElement("button");
-      li.type = "button";
-      li.className = "cnai-item";
+      const li = document.createElement("div");
+      li.className = "cnai-item" + (item.role === "assistant" ? " cnai-asst" : "");
       li.dataset.text = item.text;
-      li.title = item.text; // hover par poora sawal dikhe
+      li.title = item.text;
 
       const num = document.createElement("span");
       num.className = "cnai-num";
-      num.textContent = "#" + (idx + 1);
+      num.textContent = item.role === "assistant" ? "AI" : "#" + (idx + 1);
 
       const txt = document.createElement("span");
       txt.className = "cnai-text";
       txt.textContent = preview(item.text);
-      txt.setAttribute("dir", "auto"); // Urdu/English dono theek dikhein
+      txt.setAttribute("dir", "auto");
+      txt.addEventListener("click", () => goToPrompt(item));
+
+      // ⭐ Bookmark star
+      const star = document.createElement("button");
+      star.type = "button";
+      star.className = "cnai-star" + (bookmarks.has(item.text) ? " on" : "");
+      star.title = "Bookmark";
+      star.textContent = bookmarks.has(item.text) ? "★" : "☆";
+      star.addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleBookmark(item.text);
+        const on = bookmarks.has(item.text);
+        star.classList.toggle("on", on);
+        star.textContent = on ? "★" : "☆";
+        if (onlyBookmarks) applyFilter();
+      });
 
       li.appendChild(num);
       li.appendChild(txt);
-      li.addEventListener("click", () => goToPrompt(item));
+      li.appendChild(star);
       listEl.appendChild(li);
     });
 
     applyFilter();
   }
 
-  // Naye messages ke liye render ko halka sa debounce karke chalao.
   function scheduleRender() {
+    // Agar conversation badal gayi (URL path change), to bookmarks reload karo.
+    const newKey = bmStorageKey();
+    if (newKey !== convKey) {
+      convKey = newKey;
+      loadBookmarks().then(render);
+      return;
+    }
     if (refreshTimer) window.clearTimeout(refreshTimer);
     refreshTimer = window.setTimeout(render, 300);
   }
 
   // -- UI ------------------------------------------------------------------
-
   function buildPanel() {
     panelEl = document.createElement("div");
     panelEl.className = "cnai-panel";
-    panelEl.setAttribute("dir", "rtl"); // Urdu labels ke liye
+    panelEl.setAttribute("dir", "rtl");
 
-    // Header: title + refresh + minimize
+    // Header
     const header = document.createElement("div");
     header.className = "cnai-header";
 
@@ -136,26 +195,14 @@
     const actions = document.createElement("div");
     actions.className = "cnai-actions";
 
-    const refreshBtn = document.createElement("button");
-    refreshBtn.type = "button";
-    refreshBtn.className = "cnai-icon-btn";
-    refreshBtn.title = "List refresh karein";
-    refreshBtn.textContent = "⟳";
-    refreshBtn.addEventListener("click", render);
-
-    const minBtn = document.createElement("button");
-    minBtn.type = "button";
-    minBtn.className = "cnai-icon-btn";
-    minBtn.title = "Chhupayein / dikhayein";
-    minBtn.textContent = "—";
-    minBtn.addEventListener("click", () => togglePanel());
-
+    const refreshBtn = iconBtn("⟳", "List refresh karein", render);
+    const minBtn = iconBtn("—", "Chhupayein / dikhayein", () => togglePanel());
     actions.appendChild(refreshBtn);
     actions.appendChild(minBtn);
     header.appendChild(title);
     header.appendChild(actions);
 
-    // Search box
+    // Search
     const searchWrap = document.createElement("div");
     searchWrap.className = "cnai-search";
     searchEl = document.createElement("input");
@@ -165,24 +212,56 @@
     searchEl.addEventListener("input", applyFilter);
     searchWrap.appendChild(searchEl);
 
-    // List
+    // Filter chips: jawab bhi | sirf bookmarks
+    const chips = document.createElement("div");
+    chips.className = "cnai-chips";
+    roleToggleBtn = chipBtn("💬 جواب بھی", "Sawal + AI ke jawab dikhayein", () => {
+      showAssistant = !showAssistant;
+      roleToggleBtn.classList.toggle("on", showAssistant);
+      render();
+    });
+    bmToggleBtn = chipBtn("⭐ صرف بک مارک", "Sirf bookmark kiye hue dikhayein", () => {
+      onlyBookmarks = !onlyBookmarks;
+      bmToggleBtn.classList.toggle("on", onlyBookmarks);
+      applyFilter();
+    });
+    chips.appendChild(roleToggleBtn);
+    chips.appendChild(bmToggleBtn);
+
+    // List + footer
     listEl = document.createElement("div");
     listEl.className = "cnai-list";
-
-    // Footer count
     countEl = document.createElement("div");
     countEl.className = "cnai-count";
-    countEl.textContent = "0 sawal";
+    countEl.textContent = "0 items";
 
     panelEl.appendChild(header);
     panelEl.appendChild(searchWrap);
+    panelEl.appendChild(chips);
     panelEl.appendChild(listEl);
     panelEl.appendChild(countEl);
     document.body.appendChild(panelEl);
   }
 
-  // Panel ko poori tarah dikhao/chhupao (chhota launcher button ke sath).
-  let launcherEl = null;
+  function iconBtn(label, tip, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cnai-icon-btn";
+    b.title = tip;
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+  function chipBtn(label, tip, onClick) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "cnai-chip";
+    b.title = tip;
+    b.textContent = label;
+    b.addEventListener("click", onClick);
+    return b;
+  }
+
   function buildLauncher() {
     launcherEl = document.createElement("button");
     launcherEl.type = "button";
@@ -202,26 +281,19 @@
   }
 
   // -- Init ----------------------------------------------------------------
-
   function init() {
     buildPanel();
     buildLauncher();
-    render();
+    loadBookmarks().then(render);
 
-    // Jab DOM me naye messages aayein to list auto-update ho.
     const observer = new MutationObserver(scheduleRender);
     observer.observe(document.body, { childList: true, subtree: true });
 
-    // Toolbar icon click par toggle (background.js se message).
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.type === "CNAI_TOGGLE_PANEL") togglePanel();
     });
   }
 
-  // document_idle par body available hoti hai, phir bhi safe rahein.
-  if (document.body) {
-    init();
-  } else {
-    window.addEventListener("DOMContentLoaded", init, { once: true });
-  }
+  if (document.body) init();
+  else window.addEventListener("DOMContentLoaded", init, { once: true });
 })();

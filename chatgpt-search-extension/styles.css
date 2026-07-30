@@ -91,6 +91,35 @@
   color: #64748b;
 }
 
+/* Filter chips (jawab bhi / sirf bookmarks) */
+.cnai-chips {
+  display: flex;
+  gap: 6px;
+  padding: 0 12px 8px;
+}
+.cnai-chip {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid #24344a;
+  border-radius: 8px;
+  background: #0b1420;
+  color: #94a3b8;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+}
+.cnai-chip:hover {
+  border-color: #2dd4bf;
+  color: #cbd5e1;
+}
+.cnai-chip.on {
+  background: #2dd4bf;
+  color: #06231f;
+  border-color: #2dd4bf;
+  font-weight: 600;
+}
+
 /* List */
 .cnai-list {
   flex: 1;
@@ -142,6 +171,33 @@
   flex: 1;
   line-height: 1.4;
   word-break: break-word;
+  cursor: pointer;
+}
+
+/* AI jawab wale items ka alag badge rang */
+.cnai-item.cnai-asst .cnai-num {
+  background: #6366f1;
+  color: #fff;
+  min-width: auto;
+  padding: 1px 7px;
+}
+
+/* Bookmark star */
+.cnai-star {
+  flex: 0 0 auto;
+  border: none;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.cnai-star:hover {
+  color: #fbbf24;
+}
+.cnai-star.on {
+  color: #fbbf24;
 }
 
 .cnai-empty {

@@ -8,6 +8,7 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
+  "permissions": ["storage"],
   "action": {
     "default_title": "Chat Navigator AI — panel toggle karein",
     "default_icon": {

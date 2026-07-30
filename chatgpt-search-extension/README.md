@@ -13,6 +13,9 @@ jaata hai — bilkul waise jaise aap ke sir wale extension me hota hai.
 - 📋 Is conversation ke saare user prompts ki numbered list
 - 🔎 Live search — likhte hi list filter ho jaati hai
 - 🖱️ Kisi sawal par click karo → us message tak smooth scroll + highlight
+- 💬 **"جواب بھی" toggle** — sirf apne sawal ya AI ke jawab bhi dekhein
+- ⭐ **Bookmark** — kisi item par star lagao, wo save reh jaata hai; "صرف بک مارک"
+  toggle se sirf bookmarks dekhein (har chat ke apne bookmarks)
 - 🔄 Naye messages aate hi list khud update ho jaati hai
 - ➖ Panel ko minimize/kholne ke liye chhota button
 - 🌙 Dark theme, Urdu + English dono text theek dikhte hain
