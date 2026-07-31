@@ -58,19 +58,48 @@ To change the port: `PORT=8080 npm start` (or set `PORT` in `.env`).
 
 ---
 
-## Files created
+## Files
 
 | File                    | Purpose                                                        |
 | ----------------------- | ------------------------------------------------------------- |
-| `server.js`             | Zero-dependency Node server: serves the UI + `/api/chat` proxy |
+| `server.js`             | Local dev server: serves the UI + `/api/chat` proxy (`npm start`) |
+| `api/chat.js`           | Vercel serverless function for `/api/chat`                     |
+| `lib/groq.js`           | Shared Groq logic used by both server.js and api/chat.js       |
 | `public/index.html`     | Urdu RTL chat page                                             |
 | `public/styles.css`     | Responsive design + Nastaliq/Amiri typography                 |
 | `public/app.js`         | Chat logic, state handling, lightweight markdown renderer      |
+| `vercel.json`           | Vercel config (function timeout)                              |
 | `.env.example`          | Template for environment variables                             |
-| `.env`                  | Your real secrets (git-ignored — you create this)             |
+| `.env`                  | Your real secrets (git-ignored — you create this locally)     |
 | `.gitignore`            | Keeps `.env` and secrets out of git                           |
 | `package.json`          | `npm start` script + metadata                                 |
 | `README.md`             | This file                                                     |
+
+---
+
+## Deploy to Vercel (from GitHub)
+
+The app is Vercel-ready: `/public` is served as static files and `api/chat.js`
+runs as a serverless function. The API key lives in a Vercel Environment
+Variable — never in the code.
+
+1. Push this repo to GitHub (already done on the working branch).
+2. Go to <https://vercel.com/new> and **Import** the `jrsy-website` repository.
+3. In the import screen, set **Root Directory** to `mufti-sahab`
+   (click *Edit* next to Root Directory and pick the `mufti-sahab` folder).
+   This is important — the repo root is a different project.
+4. Framework Preset: **Other** (no build step needed).
+5. Open **Environment Variables** and add:
+   - Name: `GROQ_API_KEY`  → Value: your Groq key (`gsk_...`)
+   - (optional) `GROQ_MODEL` → e.g. `llama-3.3-70b-versatile`
+6. Click **Deploy**. When it finishes you get a public URL like
+   `https://your-project.vercel.app`.
+
+To update the site later: just push new commits to the branch/repo — Vercel
+redeploys automatically.
+
+> If you ever change or add the `GROQ_API_KEY` value in Vercel, trigger a new
+> deployment (Deployments → ⋯ → Redeploy) so the function picks it up.
 
 ---
 
