@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ur" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="مفتی صاحب — شیعہ اثنا عشری مسلک کے مطابق دینی سوالات کے جوابات" />
+    <title>مفتی صاحب — سوال جواب</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Nastaliq+Urdu:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="app-header">
+        <div class="header-inner">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true">﷽</div>
+            <div class="brand-text">
+              <h1>مفتی صاحب</h1>
+              <p>سوال جواب — علامہ ڈاکٹر سید ضمیر اختر نقوی</p>
+            </div>
+          </div>
+          <button id="resetBtn" class="reset-btn" type="button" title="گفتگو نئے سرے سے شروع کریں">
+            <span aria-hidden="true">↺</span> نئی گفتگو
+          </button>
+        </div>
+      </header>
+
+      <main class="chat" id="chat" aria-live="polite">
+        <!-- Messages are injected here -->
+      </main>
+
+      <footer class="composer">
+        <div id="statusBar" class="status-bar" role="status" hidden></div>
+        <form id="chatForm" class="composer-form" autocomplete="off">
+          <textarea
+            id="input"
+            class="composer-input"
+            rows="1"
+            placeholder="اپنا دینی سوال یہاں لکھیں…"
+            aria-label="اپنا سوال لکھیں"
+          ></textarea>
+          <button id="sendBtn" class="send-btn" type="submit" aria-label="بھیجیں">
+            <span class="send-label">بھیجیں</span>
+          </button>
+        </form>
+        <p class="disclaimer">
+          یہ ایک معاون AI ہے جو علمی رہنمائی فراہم کرتا ہے۔ یہ کسی مستند عالم، مجتہد یا مرجع کا
+          نعم البدل نہیں۔ اہم و ذاتی مسائل میں براہِ کرم کسی مستند شیعہ عالم/مرجع سے رجوع کریں۔
+        </p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
