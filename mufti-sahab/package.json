@@ -1,0 +1,16 @@
+{
+  "name": "mufti-sahab",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mufti Sahab — Urdu RTL chatbot (Shia Ithna Ashari) powered by Groq. Zero-dependency Node server.",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}
